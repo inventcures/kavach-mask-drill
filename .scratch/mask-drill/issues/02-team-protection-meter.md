@@ -4,8 +4,8 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Seam `engine/scoring` tested first (TDD): 4 x 0.04 → team leakage 0.04, PF 25; [0.04,0.04,0.04,0.35] → 0.1175, PF ≈ 8.51; leakage capped at 1; null members ignored; no members → null
-- [ ] Meter shows protection % and PF, colour bands (≥90 good, ≥70 warn, else bad) with a text label, not colour alone
-- [ ] Team row shows four members with their protection or "?"
+- [x] Seam `engine/scoring` tested first (TDD): 4 x 0.04 → team leakage 0.04, PF 25; [0.04,0.04,0.04,0.35] → 0.1175, PF ≈ 8.51; leakage capped at 1; null members ignored; no members → null
+- [x] Meter shows protection % and PF, colour bands (≥90 good, ≥70 warn, else bad) with a text label, not colour alone
+- [x] Team row shows four members with their protection or "?"

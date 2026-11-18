@@ -6,5 +6,12 @@
   "home.score": "Your score is the team's average protection. One teammate with a leaking mask pulls the whole team down, so checking each other matters as much as your own fit.",
   "home.disclaimer": "Training aid only. Always follow your hospital or state infection-control protocol. Works offline after the first visit.",
   "home.start": "Start the drill",
-  "home.comingSoon": "The drill itself is being built. Check back soon."
+  "home.comingSoon": "The drill itself is being built. Check back soon.",
+  "meter.label": "Team protection",
+  "meter.band.good": "Good",
+  "meter.band.warn": "At risk",
+  "meter.band.bad": "Unsafe",
+  "team.heading": "Your team",
+  "team.you": "You",
+  "team.unknown": "Not masked up yet"
 }
