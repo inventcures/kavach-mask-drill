@@ -1,5 +1,5 @@
 import { cleanContext, type RunContext } from './context';
-import type { Scenario } from './scenario';
+import type { Scenario, Track } from './scenario';
 import { teamProtection } from './scoring';
 import { quizResult, teamMembers, type QuizResult, type SessionState } from './session';
 
@@ -12,7 +12,7 @@ export interface SessionResult {
   v: 1;
   game: 'mask-drill';
   scenario: string;
-  track: string;
+  track: Track;
   /** ISO 8601, UTC. */
   finishedAt: string;
   durationSec: number;

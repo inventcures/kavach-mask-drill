@@ -31,7 +31,7 @@ export function Results({ lang, scenario, session, onRestart }: Props) {
 
   return (
     <>
-      <main data-testid="results">
+      <main data-testid="results" tabIndex={-1}>
         <section class="card">
           <h2>{t(lang, 'results.heading')}</h2>
           <div class="muted">{t(lang, 'results.teamAvg')}</div>
@@ -41,6 +41,9 @@ export function Results({ lang, scenario, session, onRestart }: Props) {
           <p data-testid="results-pf">{t(lang, 'results.pf', { pf: (1 / leakage).toFixed(1), perfect: Math.round(1 / FILTER_PENETRATION.n95) })}</p>
           <p data-testid="results-contamination">{t(lang, 'results.contamination', { n: session.contaminationEvents })}</p>
           <TeamRow lang={lang} members={team} />
+          <Feedback lang={lang} kind="warn">
+            <span data-testid="results-disclaimer">{t(lang, 'results.disclaimer')}</span>
+          </Feedback>
         </section>
 
         <section class="card">

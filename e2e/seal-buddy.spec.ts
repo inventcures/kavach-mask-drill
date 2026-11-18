@@ -93,6 +93,9 @@ test('each buddy decision moves the team meter, and one leaky teammate is explai
   await ravi.getByRole('button', { name: 'Looks fine, carry on' }).click();
   await expect(ravi.getByTestId('feedback')).toContainText('Ravi now has the worst protection on the team');
   await expect(ravi.getByTestId('feedback').getByRole('img', { name: 'Wrong' })).toBeVisible();
+  // The right call is pointed out as well.
+  await expect(ravi.getByRole('button', { name: /^Right Move him to the triage desk/ })).toBeDisabled();
+  await expect(ravi.getByRole('img', { name: 'Right' })).toHaveCount(1);
   await expect(ravi.locator('button:enabled')).toHaveCount(0);
   await expect(meter(page)).toHaveText('81% · PF 5.3');
   await expect(page.getByTestId('meter')).toContainText('At risk');
@@ -106,6 +109,7 @@ test('each buddy decision moves the team meter, and one leaky teammate is explai
 
   await page.getByRole('button', { name: 'हिन्दी' }).click();
   await expect(anjali.getByTestId('feedback')).toContainText('कानों पर पट्टी');
+  await expect(page.locator('[data-testid^="mate-"] legend')).toHaveText(['रवि', 'अंजलि', 'फ़ैज़']);
   await expect(meter(page)).toHaveText('86% · PF 7.1');
   await page.getByRole('button', { name: 'English' }).click();
 

@@ -21,7 +21,7 @@ export function Meter({ lang, members }: { lang: Lang; members: readonly ScoredM
         <span>{t(lang, 'meter.label')}</span>
         <span class="meter-val">
           <span data-testid="meter-value">
-            {percent}% · PF {p.pf.toFixed(1)}
+            {percent}% · <abbr title={t(lang, 'meter.pfHelp')}>{t(lang, 'meter.pf')}</abbr> {p.pf.toFixed(1)}
           </span>{' '}
           <span class="meter-band">{t(lang, `meter.band.${band}`)}</span>
         </span>

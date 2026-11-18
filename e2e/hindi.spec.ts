@@ -71,6 +71,9 @@ test('the whole drill can be played in Hindi, from the home screen to the result
   await expect(results).toContainText('कोई गलती नहीं। शानदार ड्रिल।');
   await expect(page.getByTestId('before-after').locator('tbody tr')).toHaveText(['क्विज़ स्कोर4/44/4', 'भरोसा4/54/5']);
   await expect(results).toContainText('हर बार सील चेक। हर साल फिट टेस्ट।');
+  await expect(results.getByTestId('team-row').locator('.mem-name')).toHaveText(['आप', 'रवि', 'अंजलि', 'फ़ैज़']);
+  await expect(page.getByTestId('results-disclaimer')).toContainText('यह ड्रिल फिट टेस्ट नहीं है');
+  await expect(page.getByTestId('results-disclaimer')).toContainText('सिखाने के लिए अनुमान हैं');
   expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
 
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('md_runs') ?? '[]'));

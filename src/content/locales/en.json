@@ -53,12 +53,16 @@
   "results.after": "After",
   "results.quizScore": "Quiz score",
   "results.confidence": "Confidence",
-  "results.stored": "Results are stored only on this phone. Trainers can collect the file from each phone after a session.",
+  "results.stored": "Results are stored only on this phone, for the last 50 drills played on it. Download and delete apply to all of them, including drills other people played on this phone. Trainers can collect the file after a session.",
   "results.download": "Download my results (JSON)",
   "results.delete": "Delete my results",
   "results.deleted": "Your results have been deleted from this phone.",
   "results.remember.heading": "Three things to remember",
   "results.remember.1": "Seal check every time. Fit test every year.",
   "results.remember.2": "Never touch the front of a used mask. Straps only, bottom first.",
-  "results.remember.3": "Check your buddy. The team is only as protected as its leakiest mask."
+  "results.remember.3": "Check your buddy. The team is only as protected as its leakiest mask.",
+  "meter.pf": "PF",
+  "meter.pfHelp": "PF means protection factor: outside air divided by the air that leaks in. A teaching approximation, not a measurement.",
+  "drill.protocol": "Follow your local protocol if it differs from this drill.",
+  "results.disclaimer": "Training aid only. This drill is not a fit test and does not measure how well your own mask fits. The protection numbers are teaching approximations, not measurements. Always follow your hospital or state infection-control protocol."
 }

@@ -201,7 +201,7 @@ function fitLeakage(fit: MemberFit): number | null {
 }
 
 /** The team as the meter and team row need it: leakage is null until a member is masked up. */
-export function teamMembers(scenario: Scenario, state: SessionState): (ScoredMember & { name: string })[] {
+export function teamMembers(scenario: Scenario, state: SessionState): (ScoredMember & { name: Text })[] {
   return scenario.team.map((m) => {
     const fit = state.fits[m.id];
     return { id: m.id, name: m.name, leakage: fit ? fitLeakage(fit) : null };

@@ -25,7 +25,9 @@ export function Drill({ lang, scenario, session, dispatch }: Props) {
   const screen = currentScreen(scenario, session);
   const team = teamMembers(scenario, session);
 
+  // A new screen starts at the top and takes the focus, so screen-reader and keyboard users are not left on the old Next button.
   useEffect(() => {
+    document.querySelector('main')?.focus({ preventScroll: true });
     scrollTo(0, 0);
   }, [session.index, session.finished]);
 
@@ -37,7 +39,7 @@ export function Drill({ lang, scenario, session, dispatch }: Props) {
   return (
     <>
       <Meter lang={lang} members={team} />
-      <main>
+      <main tabIndex={-1}>
         <section class="card" data-testid={`screen-${screen.id}`}>
           {at && <div class="step">{t(lang, 'drill.step', at)}</div>}
           {screen.kind === 'briefing' && <Briefing lang={lang} screen={screen} team={team} />}
@@ -82,6 +84,11 @@ export function Drill({ lang, scenario, session, dispatch }: Props) {
           )}
           {screen.kind === 'quiz' && progress?.kind === 'quiz' && scenario.quiz && (
             <Quiz lang={lang} screen={screen} quiz={scenario.quiz} progress={progress} context={session.context} dispatch={dispatch} />
+          )}
+          {at && (
+            <p class="muted protocol" data-testid="protocol-note">
+              {t(lang, 'drill.protocol')}
+            </p>
           )}
         </section>
       </main>

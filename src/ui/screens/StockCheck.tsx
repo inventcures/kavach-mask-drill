@@ -24,17 +24,17 @@ export function StockCheck({ lang, screen, decisions, onDecide }: Props) {
             <legend class="t">{inLang(item.name, lang)}</legend>
             <p class="d">{inLang(item.detail, lang)}</p>
             <div class="row2">
-              {(['use', 'reject'] as const).map((d) => (
-                <button
-                  type="button"
-                  class={`btn ${decision === d ? (right ? 'ok' : 'no') : ''}`}
-                  disabled={decision !== undefined}
-                  onClick={() => onDecide(item.id, d === 'use')}
-                >
-                  {decision === d && <Mark lang={lang} kind={right ? 'good' : 'bad'} />}
-                  {t(lang, `stock.${d}`)}
-                </button>
-              ))}
+              {(['use', 'reject'] as const).map((d) => {
+                // Once decided, the right answer is marked whether or not it was the one picked.
+                const isRight = decision !== undefined && (d === 'use') === item.usable;
+                const isPicked = decision === d;
+                return (
+                  <button type="button" class={`btn ${isRight ? 'ok' : isPicked ? 'no' : ''}`} disabled={decision !== undefined} onClick={() => onDecide(item.id, d === 'use')}>
+                    {(isRight || isPicked) && <Mark lang={lang} kind={isRight ? 'good' : 'bad'} />}
+                    {t(lang, `stock.${d}`)}
+                  </button>
+                );
+              })}
             </div>
             {decision !== undefined && (
               <Feedback lang={lang} kind={right ? 'good' : 'bad'}>

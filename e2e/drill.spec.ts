@@ -51,10 +51,15 @@ test('a perfect run ends at 96% team protection with no contamination, and the r
 
   await expect(page.getByRole('heading', { name: 'Alert: suspected Nipah case' })).toBeVisible();
   await expect(page.getByText('Step 1 / 8')).toBeVisible();
+  // A new screen takes the focus, so a screen reader starts reading it from the top.
+  await expect(page.locator('main')).toBeFocused();
   await expect(page.getByTestId('team-row').locator('.dot')).toHaveText(['?', '?', '?', '?']);
   await expect(page.getByTestId('meter')).toHaveCount(0);
   await next(page);
 
+  // Every screen that gives a rule also says the local protocol comes first.
+  await expect(page.getByTestId('protocol-note')).toHaveText('Follow your local protocol if it differs from this drill.');
+  await expect(page.getByTestId('meter')).toHaveCount(0);
   await option(page, 'triage', 'Surgical mask').click();
   await expect(page.getByTestId('task-triage').getByTestId('feedback')).toContainText('saves N95s for close contact');
   await expect(page.getByTestId('task-triage').getByTestId('feedback').getByRole('img', { name: 'Right' })).toHaveText('✓');
@@ -117,6 +122,14 @@ test('a perfect run ends at 96% team protection with no contamination, and the r
   await expect(results).toContainText('No mistakes. Excellent drill.');
   await expect(page.getByTestId('before-after').locator('tbody tr')).toHaveText(['Quiz score2/44/4', 'Confidence2/54/5']);
   await expect(results).toContainText('Seal check every time. Fit test every year.');
+  // The score must not be read as a measurement of anyone's real mask.
+  const disclaimer = page.getByTestId('results-disclaimer');
+  await expect(disclaimer).toContainText('Training aid only.');
+  await expect(disclaimer).toContainText('This drill is not a fit test');
+  await expect(disclaimer).toContainText('teaching approximations, not measurements');
+  await expect(disclaimer).toContainText('follow your hospital or state infection-control protocol');
+  await expect(results).toContainText('including drills other people played on this phone');
+  await expect(page.locator('main')).toBeFocused();
   expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
 
   // Saved once, even after the screen re-renders in another language.
@@ -189,6 +202,8 @@ test('mistakes get immediate feedback, move the meter, and survive a language sw
   await stock(page, 'B', 'Use').click();
   await expect(page.getByTestId('stock-B').getByTestId('feedback')).toContainText('the straps have perished');
   await expect(page.getByTestId('stock-B').getByTestId('feedback').getByRole('img', { name: 'Wrong' })).toBeVisible();
+  await expect(page.getByTestId('stock-B').getByRole('button', { name: 'Wrong Use' })).toBeDisabled();
+  await expect(page.getByTestId('stock-B').getByRole('button', { name: 'Right Reject' })).toBeDisabled();
   await expect(page.getByTestId('meter-value')).toHaveText('25% · PF 1.3');
   for (const item of ['A', 'C', 'D', 'E', 'F']) await stock(page, item, 'Reject').click();
   await expect(page.getByTestId('meter-value')).toHaveText('25% · PF 1.3');

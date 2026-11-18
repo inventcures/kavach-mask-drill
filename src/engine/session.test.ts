@@ -47,11 +47,11 @@ describe('session: moving through the drill', () => {
     expect(currentScreen(scenario, s)?.id).toBe('pre');
     expect(s.mistakes).toEqual([]);
     expect(s.contaminationEvents).toBe(0);
-    expect(teamMembers(scenario, s).map((m) => [m.id, m.name, m.leakage])).toEqual([
-      ['you', 'You', null],
-      ['ravi', 'Ravi', null],
-      ['anjali', 'Anjali', null],
-      ['faiz', 'Faiz', null],
+    expect(teamMembers(scenario, s).map((m) => [m.id, m.name.en, m.name.hi, m.leakage])).toEqual([
+      ['you', 'You', 'आप', null],
+      ['ravi', 'Ravi', 'रवि', null],
+      ['anjali', 'Anjali', 'अंजलि', null],
+      ['faiz', 'Faiz', 'फ़ैज़', null],
     ]);
   });
 
@@ -327,7 +327,7 @@ describe('session: buddy check', () => {
     const s = play([...toBuddy, buddy('ravi', 'fine')]);
     expect(leakages(s).ravi).toBe(0.35);
     expect(s.mistakes).toEqual([
-      { code: 'buddy_ravi', screenId: 'buddy', note: expect.objectContaining({ en: 'Ravi: Looks fine, carry on', hi: 'Ravi: ठीक लगता है, चलने दें' }) },
+      { code: 'buddy_ravi', screenId: 'buddy', note: expect.objectContaining({ en: 'Ravi: Looks fine, carry on', hi: 'रवि: ठीक लगता है, चलने दें' }) },
     ]);
   });
 

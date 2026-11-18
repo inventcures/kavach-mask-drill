@@ -1,10 +1,11 @@
 import { protectionBand, type ScoredMember } from '../../engine/scoring';
+import { inLang, type Text } from '../../engine/text';
 import { t, type Lang } from '../i18n';
 import { formatPercent } from './Meter';
 
 export interface TeamMember extends ScoredMember {
-  /** Display name. The member with id `you` is shown as "You" in the player's language. */
-  name: string;
+  /** Display name in each language. The member with id `you` is shown as "You" from the locale file. */
+  name: Text;
 }
 
 /** One dot per member with their protection %, or "?" before they are masked up. */
@@ -22,7 +23,7 @@ export function TeamRow({ lang, members }: { lang: Lang; members: readonly TeamM
             ) : (
               <span class={`dot ${band}`}>{formatPercent(m.leakage)}%</span>
             )}
-            <span class="mem-name">{m.id === 'you' ? t(lang, 'team.you') : m.name}</span>
+            <span class="mem-name">{m.id === 'you' ? t(lang, 'team.you') : inLang(m.name, lang)}</span>
           </li>
         );
       })}

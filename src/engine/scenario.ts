@@ -6,8 +6,13 @@ import type { Text } from './text';
 /** One of the four people on the team. The member with id `you` is the player. */
 export interface TeamMemberDef {
   id: string;
-  name: string;
+  /** Shown in the player's language, e.g. Ravi / रवि. Teammates are made up; no real person is named. */
+  name: Text;
 }
+
+/** The tracks a scenario can belong to (spec 4.4). */
+export const TRACKS = ['ert', 'elastomeric', 'storekeeper', 'asha'] as const;
+export type Track = (typeof TRACKS)[number];
 
 export interface ChoiceOption {
   id: string;
@@ -199,7 +204,7 @@ export type ScreenKind = ScreenDef['kind'];
 export interface Scenario {
   v: 1;
   id: string;
-  track: string;
+  track: Track;
   title: Text;
   team: TeamMemberDef[];
   /** Needed when any screen is a quiz. */
@@ -410,10 +415,12 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
 
   if (!isObj(raw)) return { ok: false, errors: ['scenario: must be an object'] };
   id(raw.id, 'id');
+  if (!(TRACKS as readonly unknown[]).includes(raw.track)) err('track', `unknown track "${String(raw.track)}"`);
   text(raw.title, 'title');
   const team = Array.isArray(raw.team) ? raw.team : [];
   team.forEach((m, i) => {
-    if (!isObj(m) || !filled(m.id) || !filled(m.name)) err(`team[${i}]`, 'needs an id and a name');
+    if (!isObj(m) || !filled(m.id)) err(`team[${i}]`, 'needs an id and a name');
+    else text(m.name, `team[${i}].name`);
   });
   if (!team.some((m) => isObj(m) && m.id === 'you')) err('team', 'needs a member with id "you"');
   const memberIds = team.map((m) => (isObj(m) ? m.id : undefined));

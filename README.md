@@ -2,9 +2,9 @@
 
 A phone-first training game for emergency response teams (ERTs) and other first responders. In about ten minutes it drills the mask skills that fail most often in an outbreak: picking the right mask, rejecting bad stock, getting a seal, checking teammates, and taking everything off without contaminating yourself.
 
-> **Training aid only.** Mask Drill does not replace fit testing, hands-on training or your infection-control team. Always follow your hospital or state infection-control protocol.
+> **Training aid only.** Mask Drill is not a fit test and does not measure how well anyone's mask fits. The protection percentages and protection factors it shows are teaching approximations, chosen to show which mistakes matter most; they are not laboratory or field measurements. It does not replace fit testing, hands-on training or your infection-control team. Always follow your hospital or state infection-control protocol.
 
-**Status:** first public build. One drill (a suspected Nipah case, ERT track) is playable end to end in English and Hindi. The Hindi text still needs review by a native speaker with clinical vocabulary before any pilot. The leakage numbers behind the score are teaching approximations, not laboratory values. See `docs/spec.md` for the full design.
+**Status:** first public build. One drill (a suspected Nipah case, ERT track) is playable end to end in English and Hindi. The Hindi text still needs review by a native speaker with clinical vocabulary before any pilot. The leakage numbers behind the score (`src/engine/constants.ts`) are teaching approximations, not laboratory values, and should not be quoted as evidence of real protection. See `docs/spec.md` for the full design.
 
 ## How to play
 
@@ -27,6 +27,7 @@ For trainers: give the group one trainer code (for example `KZD-ERT-1125`) to ty
 - The trainer code is the only thing a player types. It is cut down to capital letters, digits and hyphens, 16 characters at most, so a name or a sentence cannot be stored.
 - **Download my results (JSON)** saves those records as a file on the phone. Nothing is sent anywhere unless the player shares that file.
 - **Delete my results** on the results screen removes every saved run from the phone. Clearing the browser's site data does the same.
+- On a shared phone, download and delete cover every run saved on that phone (up to 50), including runs other people played. The results screen says so. No run can be linked to a person.
 - If the browser blocks storage (some private modes), the game still works; results are just not kept after the page closes.
 - This is enough for informal training sessions. Before any formal study, get ethics review and a proper consent form.
 
@@ -57,7 +58,7 @@ The end-to-end tests need Chromium: run `npx playwright install chromium` once o
 - `src/engine/` holds the game logic as pure TypeScript with no DOM. `src/content/` holds scenarios and locale files as JSON. `src/ui/` holds generic, scenario-driven screens and components. `src/app.tsx` wires them together.
 - Every UI string lives in `src/content/locales/<lang>.json`. A missing key falls back to English.
 - `scripts/build-sw.mjs` writes a small service worker that precaches every built file. `scripts/check-size.mjs` fails the build if `dist/` goes over 250 KB gzipped.
-- `.github/workflows/deploy.yml` typechecks, tests, builds and deploys `dist/` to GitHub Pages on every push to `main`. The build uses a relative base path, so it works under `/<repo>/`. In the repository settings, set **Pages → Source** to **GitHub Actions**.
+- `.github/workflows/deploy.yml` typechecks, runs the unit tests, builds, runs the Playwright end-to-end suite against the production build, and only then deploys `dist/` to GitHub Pages on every push to `main`. Pull requests get the same checks without the deploy. The build uses a relative base path, so it works under `/<repo>/`. In the repository settings, set **Pages → Source** to **GitHub Actions**.
 
 ## Contributing
 

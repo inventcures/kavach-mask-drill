@@ -70,6 +70,16 @@ describe('scenario validation', () => {
     expect(errorsOf(broken((s) => (s.screens[4].steps = [s.screens[4].steps[0]])))).toEqual(['screens[4].steps: needs at least 2 steps']);
   });
 
+  it('rejects a teammate whose name is not given in every language', () => {
+    expect(errorsOf(broken((s) => delete s.team[1].name.hi))).toEqual(['team[1].name: missing "hi"']);
+    expect(errorsOf(broken((s) => (s.team[2].name = 'Anjali')))).toEqual(['team[2].name: missing "en"', 'team[2].name: missing "hi"']);
+  });
+
+  it('rejects a scenario on a track the game does not have', () => {
+    expect(errorsOf(broken((s) => (s.track = 'surgeon')))).toEqual(['track: unknown track "surgeon"']);
+    expect(errorsOf(broken((s) => delete s.track))).toEqual(['track: unknown track "undefined"']);
+  });
+
   it('requires the player to be on the team', () => {
     expect(errorsOf(broken((s) => s.team.shift()))).toEqual(['team: needs a member with id "you"']);
   });

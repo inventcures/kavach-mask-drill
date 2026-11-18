@@ -9,19 +9,31 @@
   "team": [
     {
       "id": "you",
-      "name": "You"
+      "name": {
+        "en": "You",
+        "hi": "आप"
+      }
     },
     {
       "id": "ravi",
-      "name": "Ravi"
+      "name": {
+        "en": "Ravi",
+        "hi": "रवि"
+      }
     },
     {
       "id": "anjali",
-      "name": "Anjali"
+      "name": {
+        "en": "Anjali",
+        "hi": "अंजलि"
+      }
     },
     {
       "id": "faiz",
-      "name": "Faiz"
+      "name": {
+        "en": "Faiz",
+        "hi": "फ़ैज़"
+      }
     }
   ],
   "quiz": {
