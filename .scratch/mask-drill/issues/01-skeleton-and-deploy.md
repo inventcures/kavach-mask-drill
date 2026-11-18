@@ -4,10 +4,10 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `npm run build` produces a static `dist/` under 250 KB gzipped (a script checks this and fails if exceeded)
-- [ ] Home screen renders at 360x800 with the language toggle working
-- [ ] Service worker caches the app shell; a Playwright test reloads offline and the home screen still renders
-- [ ] `.github/workflows/deploy.yml` builds, tests and deploys to Pages
-- [ ] `npm test`, `npm run typecheck`, `npm run build` all pass
+- [x] `npm run build` produces a static `dist/` under 250 KB gzipped (a script checks this and fails if exceeded)
+- [x] Home screen renders at 360x800 with the language toggle working
+- [x] Service worker caches the app shell; a Playwright test reloads offline and the home screen still renders
+- [x] `.github/workflows/deploy.yml` builds, tests and deploys to Pages
+- [x] `npm test`, `npm run typecheck`, `npm run build` all pass

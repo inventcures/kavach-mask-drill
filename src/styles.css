@@ -1,0 +1,78 @@
+/* One stylesheet for the whole app. Colours are tokens; dark mode only swaps the tokens. */
+:root {
+  --bg: #f6f4ef; --card: #ffffff; --ink: #1d2321; --muted: #5d6763; --line: #dcd8cf;
+  --brand: #0f5257; --brand-ink: #ffffff; --good: #1f7a3f; --good-bg: #e3f2e7;
+  --bad: #b3261e; --bad-bg: #fbe7e5; --warn: #8a5a00; --warn-bg: #fff2d6; --accent: #e0a526;
+  --chip: #eef0ec;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121615; --card: #1b2120; --ink: #e8ece9; --muted: #9aa5a0; --line: #2e3634;
+    --brand: #3fa3a8; --brand-ink: #071413; --good: #6fd08f; --good-bg: #16301f;
+    --bad: #ff8a80; --bad-bg: #3a1a18; --warn: #ffcf6b; --warn-bg: #3a2d10; --chip: #242b29;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #121615; --card: #1b2120; --ink: #e8ece9; --muted: #9aa5a0; --line: #2e3634;
+  --brand: #3fa3a8; --brand-ink: #071413; --good: #6fd08f; --good-bg: #16301f;
+  --bad: #ff8a80; --bad-bg: #3a1a18; --warn: #ffcf6b; --warn-bg: #3a2d10; --chip: #242b29;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Devanagari', sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+header {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 16px;
+  background: var(--brand); color: var(--brand-ink);
+}
+header h1 { flex: 1; margin: 0; font-size: 17px; letter-spacing: 0.2px; }
+.lang-toggle {
+  min-height: 48px; min-width: 48px; padding: 4px 12px;
+  background: transparent; color: inherit;
+  border: 1px solid currentColor; border-radius: 8px;
+  font: inherit; font-size: 14px; cursor: pointer;
+}
+
+main { max-width: 560px; margin: 0 auto; padding: 16px 16px 96px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 0 0 14px; }
+h2 { font-size: 20px; margin: 0 0 8px; }
+p { margin: 0 0 10px; }
+.muted { color: var(--muted); font-size: 14px; }
+a { color: var(--brand); }
+
+.btn {
+  display: block; width: 100%; min-height: 48px;
+  padding: 12px 14px; margin: 0 0 10px;
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--line); border-radius: 12px;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.btn:active { transform: scale(0.99); }
+.btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); text-align: center; font-weight: 600; }
+.btn[disabled] { opacity: 0.55; cursor: default; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.fb { border-radius: 10px; padding: 10px 12px; margin: 10px 0; font-size: 15px; }
+.fb.good { background: var(--good-bg); border-left: 4px solid var(--good); }
+.fb.bad { background: var(--bad-bg); border-left: 4px solid var(--bad); }
+.fb.warn { background: var(--warn-bg); border-left: 4px solid var(--accent); }
+
+.foot {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--card); border-top: 1px solid var(--line);
+}
+.foot .btn { max-width: 560px; margin: 0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
