@@ -1,0 +1,6 @@
+{
+  "wrongChoice": { "en": "Chose {option} for: {task}", "hi": "{task} के लिए {option} चुना" },
+  "usedBadStock": { "en": "Used {item}", "hi": "{item} इस्तेमाल किया" },
+  "rejectedGoodStock": { "en": "Rejected {item}", "hi": "{item} हटाया" },
+  "outOfOrder": { "en": "Out of order: {step} at step {n}", "hi": "गलत क्रम: चरण {n} पर {step}" }
+}

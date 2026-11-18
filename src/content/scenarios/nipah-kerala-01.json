@@ -1,0 +1,228 @@
+{
+  "v": 1,
+  "id": "nipah-kerala-01",
+  "track": "ert",
+  "title": { "en": "Suspected Nipah case at a district hospital", "hi": "ज़िला अस्पताल में संदिग्ध निपाह केस" },
+  "team": [
+    { "id": "you", "name": "You" },
+    { "id": "ravi", "name": "Ravi" },
+    { "id": "anjali", "name": "Anjali" },
+    { "id": "faiz", "name": "Faiz" }
+  ],
+  "screens": [
+    {
+      "kind": "briefing",
+      "id": "alert",
+      "icon": "⚠",
+      "title": { "en": "Alert: suspected Nipah case", "hi": "अलर्ट: संदिग्ध निपाह केस" },
+      "body": [
+        {
+          "en": "08:10. A district hospital calls your ERT. A 34-year-old man has fever, confusion and a cough. His neighbour died last week with similar symptoms. He needs triage at the entrance, a transfer by ambulance to the isolation ward, and suctioning of his airway on arrival.",
+          "hi": "सुबह 08:10। एक ज़िला अस्पताल आपकी ERT को बुलाता है। 34 साल के एक व्यक्ति को बुखार, भ्रम और खाँसी है। पिछले हफ़्ते उसके पड़ोसी की इन्हीं लक्षणों के साथ मौत हुई थी। उसे प्रवेश द्वार पर ट्राइएज, एम्बुलेंस से आइसोलेशन वार्ड तक ले जाना, और पहुँचने पर उसके वायुमार्ग की सक्शनिंग की ज़रूरत है।"
+        },
+        {
+          "en": "Nipah spreads mainly through close contact with body fluids and respiratory droplets. Aerosol-generating procedures such as suctioning raise the risk further.",
+          "hi": "निपाह मुख्य रूप से शरीर के तरल पदार्थों और साँस की बूँदों के नज़दीकी संपर्क से फैलता है। सक्शनिंग जैसी एरोसोल बनाने वाली प्रक्रियाएँ खतरा और बढ़ाती हैं।"
+        }
+      ],
+      "showTeam": true
+    },
+    {
+      "kind": "choice",
+      "id": "choose",
+      "title": { "en": "Pick the right protection for each task", "hi": "हर काम के लिए सही सुरक्षा चुनें" },
+      "options": [
+        { "id": "cloth", "mask": "cloth", "label": { "en": "Cloth mask", "hi": "कपड़े का मास्क" } },
+        { "id": "surgical", "mask": "surgical", "label": { "en": "Surgical mask", "hi": "सर्जिकल मास्क" } },
+        { "id": "n95", "mask": "n95", "label": { "en": "N95 only", "hi": "केवल N95" } },
+        { "id": "n95eye", "mask": "n95", "label": { "en": "N95 + goggles or face shield", "hi": "N95 + गॉगल्स या फ़ेस शील्ड" } }
+      ],
+      "tasks": [
+        {
+          "id": "triage",
+          "prompt": {
+            "en": "Triage desk at the entrance, 2 m from patients, behind a screen",
+            "hi": "प्रवेश पर ट्राइएज डेस्क, मरीज़ों से 2 मीटर दूर, स्क्रीन के पीछे"
+          },
+          "correct": ["surgical", "n95", "n95eye"],
+          "best": "surgical",
+          "explain": {
+            "en": "At a distance with a barrier, a surgical mask is reasonable and saves N95s for close contact. An N95 also works, but stock is limited.",
+            "hi": "दूरी और बैरियर के साथ सर्जिकल मास्क ठीक है, और N95 नज़दीकी संपर्क के लिए बचते हैं। N95 भी चलेगा, पर स्टॉक सीमित है।"
+          }
+        },
+        {
+          "id": "transfer",
+          "prompt": {
+            "en": "Ambulance transfer: you sit next to the coughing patient for 25 minutes",
+            "hi": "एम्बुलेंस ट्रांसफ़र: आप 25 मिनट तक खाँसते मरीज़ के बगल में बैठते हैं"
+          },
+          "correct": ["n95eye"],
+          "best": "n95eye",
+          "setsPlayerMask": true,
+          "explain": {
+            "en": "Close contact with a coughing suspected Nipah patient in a small space: N95 plus eye protection (goggles or face shield), with gown and gloves.",
+            "hi": "छोटी जगह में खाँसते संदिग्ध निपाह मरीज़ से नज़दीकी संपर्क: N95 और आँखों की सुरक्षा (गॉगल्स या फ़ेस शील्ड), साथ में गाउन और दस्ताने।"
+          }
+        },
+        {
+          "id": "agp",
+          "prompt": { "en": "Airway suctioning in the isolation room", "hi": "आइसोलेशन रूम में वायुमार्ग की सक्शनिंग" },
+          "correct": ["n95eye"],
+          "best": "n95eye",
+          "explain": {
+            "en": "Suctioning generates aerosols. N95 plus face shield or goggles, gown, gloves, in an isolation room. Never a surgical or cloth mask.",
+            "hi": "सक्शनिंग से एरोसोल बनते हैं। N95 के साथ फ़ेस शील्ड या गॉगल्स, गाउन, दस्ताने, और आइसोलेशन रूम। सर्जिकल या कपड़े का मास्क कभी नहीं।"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "stock",
+      "id": "stock",
+      "title": { "en": "Check the stockpile", "hi": "स्टॉक की जाँच करें" },
+      "hint": {
+        "en": "Today is 18 Nov 2026. Decide which masks the team can use.",
+        "hi": "आज 18 नवंबर 2026 है। तय करें कि टीम कौन से मास्क इस्तेमाल कर सकती है।"
+      },
+      "items": [
+        {
+          "id": "A",
+          "name": { "en": "N95, box 1", "hi": "N95, डिब्बा 1" },
+          "detail": { "en": "Sealed pack. Expiry 06/2028. Straps elastic.", "hi": "सील पैक। एक्सपायरी 06/2028। पट्टियाँ लचीली।" },
+          "usable": true,
+          "explain": { "en": "Good to use.", "hi": "इस्तेमाल के लिए ठीक।" }
+        },
+        {
+          "id": "B",
+          "name": { "en": "N95, box 2", "hi": "N95, डिब्बा 2" },
+          "detail": {
+            "en": "Sealed pack. Expiry 03/2025. Straps feel loose and crack when stretched.",
+            "hi": "सील पैक। एक्सपायरी 03/2025। पट्टियाँ ढीली हैं और खींचने पर चटकती हैं।"
+          },
+          "usable": false,
+          "explain": {
+            "en": "Expired, and the straps have perished. Old elastic cannot hold a seal. Set it aside and report it in the stock log.",
+            "hi": "एक्सपायर हो चुका, और पट्टियाँ खराब हो गई हैं। पुराना इलास्टिक सील नहीं पकड़ सकता। अलग रखें और स्टॉक लॉग में दर्ज करें।"
+          }
+        },
+        {
+          "id": "C",
+          "name": { "en": "N95 with exhalation valve", "hi": "वाल्व वाला N95" },
+          "detail": { "en": "In date. Has a round plastic valve on the front.", "hi": "एक्सपायरी ठीक। सामने गोल प्लास्टिक वाल्व है।" },
+          "usable": false,
+          "explain": {
+            "en": "The valve protects you, but lets your unfiltered breath out. In patient care and sterile areas, use valveless N95s so you do not spread infection if you are infected yourself.",
+            "hi": "वाल्व आपको बचाता है, पर आपकी बिना फ़िल्टर की साँस बाहर जाती है। मरीज़ की देखभाल में बिना वाल्व वाला N95 इस्तेमाल करें, ताकि अगर आप खुद संक्रमित हों तो संक्रमण न फैले।"
+          }
+        },
+        {
+          "id": "D",
+          "name": { "en": "N95, loose in a cardboard box", "hi": "N95, गत्ते के डिब्बे में खुले" },
+          "detail": {
+            "en": "No packaging. Box was stored under a leaking AC unit; masks are damp and creased.",
+            "hi": "पैकिंग नहीं। डिब्बा टपकते AC के नीचे रखा था; मास्क गीले और मुड़े हुए हैं।"
+          },
+          "usable": false,
+          "explain": {
+            "en": "Wet or crushed filters lose performance and may be contaminated. Reject. Store masks dry, sealed, off the floor.",
+            "hi": "गीले या दबे हुए फ़िल्टर ठीक काम नहीं करते और दूषित हो सकते हैं। हटाएँ। मास्क सूखे, सील पैक में, ज़मीन से ऊपर रखें।"
+          }
+        },
+        {
+          "id": "E",
+          "name": { "en": "N95, box 3 (different model)", "hi": "N95, डिब्बा 3 (दूसरा मॉडल)" },
+          "detail": {
+            "en": "Sealed. Expiry 11/2027. NIOSH/BIS marking printed on the mask.",
+            "hi": "सील पैक। एक्सपायरी 11/2027। मास्क पर NIOSH/BIS मार्किंग छपी है।"
+          },
+          "usable": true,
+          "explain": {
+            "en": "Good to use. Having two models helps: faces that do not fit one often fit the other.",
+            "hi": "इस्तेमाल के लिए ठीक। दो मॉडल होना अच्छा है: जिनके चेहरे पर एक फिट नहीं होता, उन पर दूसरा अक्सर हो जाता है।"
+          }
+        },
+        {
+          "id": "F",
+          "name": { "en": "\"N95\" with no markings", "hi": "बिना मार्किंग वाला \"N95\"" },
+          "detail": {
+            "en": "Bought locally during a shortage. No standard or manufacturer printed on it. Ear loops, not head straps.",
+            "hi": "कमी के समय लोकल खरीदा गया। उस पर कोई मानक या निर्माता नहीं छपा। सिर की पट्टी नहीं, कान के लूप।"
+          },
+          "usable": false,
+          "explain": {
+            "en": "Unmarked masks are often counterfeit. Ear loops rarely seal well. Reject and flag the supplier.",
+            "hi": "बिना मार्किंग वाले मास्क अक्सर नकली होते हैं। कान के लूप से सील कम ही बनता है। हटाएँ और सप्लायर की शिकायत करें।"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "sequence",
+      "id": "don",
+      "title": { "en": "Put on your PPE in the right order", "hi": "PPE सही क्रम में पहनें" },
+      "hint": { "en": "Tap the steps in order.", "hi": "चरणों को क्रम से टैप करें।" },
+      "steps": [
+        { "en": "Hand hygiene", "hi": "हाथों की सफ़ाई" },
+        { "en": "Gown", "hi": "गाउन" },
+        { "en": "N95", "hi": "N95" },
+        { "en": "Seal check", "hi": "सील चेक" },
+        { "en": "Goggles or face shield", "hi": "गॉगल्स या फ़ेस शील्ड" },
+        { "en": "Gloves (over gown cuffs)", "hi": "दस्ताने (गाउन की कफ़ के ऊपर)" }
+      ],
+      "mistakeCode": "don_order",
+      "mistakeGroup": { "en": "Put on PPE out of order", "hi": "PPE गलत क्रम में पहना" },
+      "explain": {
+        "en": "Clean hands first, gown, then mask and seal check before anything covers your face, then eye protection, and gloves last so they cover the gown cuffs.",
+        "hi": "पहले साफ़ हाथ, फिर गाउन, फिर मास्क और चेहरे पर कुछ और लगाने से पहले सील चेक, फिर आँखों की सुरक्षा, और आखिर में दस्ताने ताकि वे गाउन की कफ़ को ढकें।"
+      }
+    },
+    {
+      "kind": "sequence",
+      "id": "doff",
+      "title": {
+        "en": "The patient is handed over. Take off your PPE safely",
+        "hi": "मरीज़ सौंप दिया गया। अपना PPE सुरक्षित तरीके से उतारें"
+      },
+      "hint": {
+        "en": "Doffing is where most self-contamination happens. Tap the steps in order. Watch for traps.",
+        "hi": "ज़्यादातर खुद का संक्रमण उतारते समय होता है। चरणों को क्रम से टैप करें। जाल से बचें।"
+      },
+      "steps": [
+        { "en": "Remove gloves (glove-in-glove)", "hi": "दस्ताने उतारें (दस्ताने के अंदर दस्ताना)" },
+        { "en": "Hand hygiene", "hi": "हाथों की सफ़ाई" },
+        { "en": "Remove gown, rolling it inside out", "hi": "गाउन उतारें, अंदर की ओर लपेटते हुए" },
+        { "en": "Remove goggles by the strap from behind", "hi": "गॉगल्स पीछे की पट्टी से उतारें" },
+        { "en": "Step out of the room", "hi": "कमरे से बाहर आएँ" },
+        {
+          "en": "Remove N95: bottom strap, then top strap, without touching the front",
+          "hi": "N95 उतारें: पहले नीचे की पट्टी, फिर ऊपर की, सामने का हिस्सा छुए बिना"
+        },
+        { "en": "Hand hygiene", "hi": "हाथों की सफ़ाई" }
+      ],
+      "traps": [
+        {
+          "label": { "en": "Pull the N95 off by the front", "hi": "N95 को सामने से पकड़कर खींचें" },
+          "explain": {
+            "en": "The front of the mask is the most contaminated surface. Touching it moves virus to your hands and face.",
+            "hi": "मास्क का सामने वाला हिस्सा सबसे ज़्यादा दूषित होता है। उसे छूने से वायरस आपके हाथों और चेहरे तक पहुँचता है।"
+          }
+        },
+        {
+          "label": { "en": "Adjust goggles with gloved hands", "hi": "दस्ताने पहने हाथों से गॉगल्स ठीक करें" },
+          "explain": {
+            "en": "Contaminated gloves near your eyes is a classic route of infection. Clean hands first, handle by the strap.",
+            "hi": "आँखों के पास दूषित दस्ताने संक्रमण का आम रास्ता है। पहले हाथ साफ़ करें, पट्टी से पकड़ें।"
+          }
+        }
+      ],
+      "countsContamination": true,
+      "mistakeCode": "doff_order",
+      "mistakeGroup": { "en": "Took off PPE out of order", "hi": "PPE गलत क्रम में उतारा" },
+      "explain": {
+        "en": "Gloves come off first because they are the dirtiest. Clean hands between steps. The N95 comes off last and outside the room, because the air inside may still carry virus.",
+        "hi": "दस्ताने पहले उतरते हैं क्योंकि वे सबसे गंदे होते हैं। हर चरण के बीच हाथ साफ़ करें। N95 सबसे आखिर में और कमरे के बाहर उतरता है, क्योंकि अंदर की हवा में अब भी वायरस हो सकता है।"
+      }
+    }
+  ]
+}

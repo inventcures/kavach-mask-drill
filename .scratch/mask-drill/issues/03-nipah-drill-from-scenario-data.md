@@ -6,10 +6,10 @@ Decision-rich shape from the prototype (sequence checking): duplicate labels suc
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Seams `engine/sequence`, `engine/session` (advance, record mistake, restart) and `engine/scenario` (schema validation; every Text has `en`; build/test fails if a `hi` key is missing) tested first
-- [ ] Choice of mask for the ambulance transfer sets the player's base leakage (surgical 0.35, cloth 0.6, N95 0.03)
-- [ ] Using a bad stock item sets a stock penalty (+0.15) for the player
-- [ ] Switching language mid-screen keeps progress and never duplicates mistakes
-- [ ] Each screen shows immediate feedback with icon + text
+- [x] Seams `engine/sequence`, `engine/session` (advance, record mistake, restart) and `engine/scenario` (schema validation; every Text has `en`; build/test fails if a `hi` key is missing) tested first
+- [x] Choice of mask for the ambulance transfer sets the player's base leakage (surgical 0.35, cloth 0.6, N95 0.03)
+- [x] Using a bad stock item sets a stock penalty (+0.15) for the player
+- [x] Switching language mid-screen keeps progress and never duplicates mistakes
+- [x] Each screen shows immediate feedback with icon + text

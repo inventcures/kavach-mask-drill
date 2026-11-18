@@ -12,12 +12,15 @@ export const LANG_NAMES: Record<Lang, string> = { en: 'English', hi: 'हिन�
 const MESSAGES: Record<Lang, Partial<Record<MessageKey, string>>> = { en, hi };
 const STORAGE_KEY = 'md_lang';
 
-/** Looks up a UI string. A key missing from the locale falls back to English. */
-export function t(lang: Lang, key: MessageKey): string {
-  const text = MESSAGES[lang][key];
-  if (text !== undefined) return text;
-  if (import.meta.env.DEV) console.warn(`[i18n] "${key}" is missing in ${lang}; using English`);
-  return en[key];
+/** Looks up a UI string and fills its `{name}` placeholders. A key missing from the locale falls back to English. */
+export function t(lang: Lang, key: MessageKey, values?: Record<string, string | number>): string {
+  let text = MESSAGES[lang][key];
+  if (text === undefined) {
+    if (import.meta.env.DEV) console.warn(`[i18n] "${key}" is missing in ${lang}; using English`);
+    text = en[key];
+  }
+  if (!values) return text;
+  return text.replace(/\{(\w+)\}/g, (whole, name: string) => (name in values ? String(values[name]) : whole));
 }
 
 export function nextLang(lang: Lang): Lang {
