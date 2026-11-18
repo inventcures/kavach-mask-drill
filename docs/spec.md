@@ -237,7 +237,7 @@ A trainer opens `?mode=group` on one phone connected to a projector. Players use
 | Network | First load on 2G in under 10 s; everything after works offline |
 | Size | Total transferred under 250 KB gzipped for v1 (prototype is 45 KB uncompressed) |
 | Install | Installable as a PWA ("Add to home screen"); no Play Store needed in v1 |
-| Hosting | GitHub Pages from the public repo, deployed by GitHub Actions on every push to `main` |
+| Hosting | Railway (static Node server, `railway up`); GitHub Actions runs the checks on every push |
 | Data | No server in v1. Results stay on the device until the user downloads or shares them |
 
 ### 6.2 Stack

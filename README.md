@@ -39,7 +39,7 @@ Needs Node 22.12 or newer.
 npm ci
 npm run dev        # dev server with hot reload (no service worker)
 npm run build      # static site in dist/, plus service worker and size-budget check
-npm run preview    # serve dist/ the way GitHub Pages will
+npm start          # serve dist/ with the same small Node server Railway runs
 ```
 
 Checks:
@@ -58,7 +58,8 @@ The end-to-end tests need Chromium: run `npx playwright install chromium` once o
 - `src/engine/` holds the game logic as pure TypeScript with no DOM. `src/content/` holds scenarios and locale files as JSON. `src/ui/` holds generic, scenario-driven screens and components. `src/app.tsx` wires them together.
 - Every UI string lives in `src/content/locales/<lang>.json`. A missing key falls back to English.
 - `scripts/build-sw.mjs` writes a small service worker that precaches every built file. `scripts/check-size.mjs` fails the build if `dist/` goes over 250 KB gzipped.
-- `.github/workflows/deploy.yml` typechecks, runs the unit tests, builds, runs the Playwright end-to-end suite against the production build, and only then deploys `dist/` to GitHub Pages on every push to `main`. Pull requests get the same checks without the deploy. The build uses a relative base path, so it works under `/<repo>/`. In the repository settings, set **Pages → Source** to **GitHub Actions**.
+- `.github/workflows/ci.yml` typechecks, runs the unit tests, builds, and runs the Playwright end-to-end suite against the production build on every push and pull request.
+- Hosting: [Railway](https://railway.com). `railway.json` builds with `npm ci && npm run build` and starts `node server.mjs`, a dependency-free static server for `dist/` on `$PORT`. Deploy with `railway up` from a checkout.
 
 ## Contributing
 
