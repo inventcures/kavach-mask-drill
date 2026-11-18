@@ -2,19 +2,206 @@
   "v": 1,
   "id": "nipah-kerala-01",
   "track": "ert",
-  "title": { "en": "Suspected Nipah case at a district hospital", "hi": "ज़िला अस्पताल में संदिग्ध निपाह केस" },
+  "title": {
+    "en": "Suspected Nipah case at a district hospital",
+    "hi": "ज़िला अस्पताल में संदिग्ध निपाह केस"
+  },
   "team": [
-    { "id": "you", "name": "You" },
-    { "id": "ravi", "name": "Ravi" },
-    { "id": "anjali", "name": "Anjali" },
-    { "id": "faiz", "name": "Faiz" }
+    {
+      "id": "you",
+      "name": "You"
+    },
+    {
+      "id": "ravi",
+      "name": "Ravi"
+    },
+    {
+      "id": "anjali",
+      "name": "Anjali"
+    },
+    {
+      "id": "faiz",
+      "name": "Faiz"
+    }
   ],
+  "quiz": {
+    "confidence": {
+      "prompt": {
+        "en": "How confident are you that you can put on, check and remove an N95 correctly?",
+        "hi": "आपको कितना भरोसा है कि आप N95 सही तरीके से पहन, जाँच और उतार सकते हैं?"
+      },
+      "low": {
+        "en": "1 not at all",
+        "hi": "1 बिल्कुल नहीं"
+      },
+      "high": {
+        "en": "5 very",
+        "hi": "5 बहुत"
+      }
+    },
+    "items": [
+      {
+        "id": "seal_vs_fit",
+        "prompt": {
+          "en": "A user seal check is the same as a fit test.",
+          "hi": "यूज़र सील चेक और फिट टेस्ट एक ही चीज़ हैं।"
+        },
+        "options": [
+          {
+            "id": "true",
+            "label": {
+              "en": "True",
+              "hi": "सही"
+            }
+          },
+          {
+            "id": "false",
+            "label": {
+              "en": "False",
+              "hi": "गलत"
+            }
+          }
+        ],
+        "correct": "false"
+      },
+      {
+        "id": "doff_hold",
+        "prompt": {
+          "en": "When you take off an N95, you should hold:",
+          "hi": "N95 उतारते समय आपको क्या पकड़ना चाहिए:"
+        },
+        "options": [
+          {
+            "id": "front",
+            "label": {
+              "en": "The front of the mask",
+              "hi": "मास्क का सामने वाला हिस्सा"
+            }
+          },
+          {
+            "id": "straps",
+            "label": {
+              "en": "The straps, bottom one first",
+              "hi": "पट्टियाँ, पहले नीचे वाली"
+            }
+          },
+          {
+            "id": "either",
+            "label": {
+              "en": "Either is fine",
+              "hi": "कुछ भी ठीक है"
+            }
+          }
+        ],
+        "correct": "straps"
+      },
+      {
+        "id": "weakest_seal",
+        "prompt": {
+          "en": "Four teammates: three have a perfect seal, one has a big gap. Team exposure is mostly decided by:",
+          "hi": "चार साथी: तीन का सील बिल्कुल ठीक है, एक के मास्क में बड़ा गैप है। टीम का एक्सपोज़र ज़्यादातर किससे तय होता है:"
+        },
+        "options": [
+          {
+            "id": "good",
+            "label": {
+              "en": "The three good seals",
+              "hi": "तीन अच्छे सील से"
+            }
+          },
+          {
+            "id": "bad",
+            "label": {
+              "en": "The one bad seal",
+              "hi": "एक खराब सील से"
+            }
+          },
+          {
+            "id": "brand",
+            "label": {
+              "en": "The mask brand",
+              "hi": "मास्क के ब्रांड से"
+            }
+          }
+        ],
+        "correct": "bad"
+      },
+      {
+        "id": "valve",
+        "prompt": {
+          "en": "An N95 with an exhalation valve is a good choice when caring for an infectious patient.",
+          "hi": "संक्रामक मरीज़ की देखभाल में वाल्व वाला N95 अच्छा विकल्प है।"
+        },
+        "options": [
+          {
+            "id": "true",
+            "label": {
+              "en": "True",
+              "hi": "सही"
+            }
+          },
+          {
+            "id": "false",
+            "label": {
+              "en": "False",
+              "hi": "गलत"
+            }
+          }
+        ],
+        "correct": "false"
+      }
+    ],
+    "comfort": {
+      "prompt": {
+        "en": "How comfortable would you be wearing an N95 for a full shift?",
+        "hi": "पूरी शिफ़्ट में N95 पहनना आपके लिए कितना आरामदायक होगा?"
+      },
+      "low": {
+        "en": "1 not at all",
+        "hi": "1 बिल्कुल नहीं"
+      },
+      "high": {
+        "en": "5 very",
+        "hi": "5 बहुत"
+      }
+    },
+    "willingToWear": {
+      "prompt": {
+        "en": "How willing are you to wear an N95 for a full shift during an outbreak?",
+        "hi": "प्रकोप के दौरान पूरी शिफ़्ट में N95 पहनने के लिए आप कितने तैयार हैं?"
+      },
+      "low": {
+        "en": "1 not at all",
+        "hi": "1 बिल्कुल नहीं"
+      },
+      "high": {
+        "en": "5 very",
+        "hi": "5 बहुत"
+      }
+    }
+  },
   "screens": [
+    {
+      "kind": "quiz",
+      "id": "pre",
+      "phase": "pre",
+      "title": {
+        "en": "Before we start",
+        "hi": "शुरू करने से पहले"
+      },
+      "note": {
+        "en": "No names are collected. Your answers and score are saved only on this phone, and you can delete them on the results screen. Nothing is sent anywhere unless you download the file and share it yourself.",
+        "hi": "कोई नाम नहीं लिया जाता। आपके जवाब और स्कोर सिर्फ़ इसी फ़ोन पर सेव होते हैं, और आप उन्हें नतीजों की स्क्रीन पर मिटा सकते हैं। जब तक आप खुद फ़ाइल डाउनलोड करके साझा न करें, कुछ भी कहीं नहीं भेजा जाता।"
+      }
+    },
     {
       "kind": "briefing",
       "id": "alert",
       "icon": "⚠",
-      "title": { "en": "Alert: suspected Nipah case", "hi": "अलर्ट: संदिग्ध निपाह केस" },
+      "title": {
+        "en": "Alert: suspected Nipah case",
+        "hi": "अलर्ट: संदिग्ध निपाह केस"
+      },
       "body": [
         {
           "en": "08:10. A district hospital calls your ERT. A 34-year-old man has fever, confusion and a cough. His neighbour died last week with similar symptoms. He needs triage at the entrance, a transfer by ambulance to the isolation ward, and suctioning of his airway on arrival.",
@@ -30,12 +217,43 @@
     {
       "kind": "choice",
       "id": "choose",
-      "title": { "en": "Pick the right protection for each task", "hi": "हर काम के लिए सही सुरक्षा चुनें" },
+      "title": {
+        "en": "Pick the right protection for each task",
+        "hi": "हर काम के लिए सही सुरक्षा चुनें"
+      },
       "options": [
-        { "id": "cloth", "mask": "cloth", "label": { "en": "Cloth mask", "hi": "कपड़े का मास्क" } },
-        { "id": "surgical", "mask": "surgical", "label": { "en": "Surgical mask", "hi": "सर्जिकल मास्क" } },
-        { "id": "n95", "mask": "n95", "label": { "en": "N95 only", "hi": "केवल N95" } },
-        { "id": "n95eye", "mask": "n95", "label": { "en": "N95 + goggles or face shield", "hi": "N95 + गॉगल्स या फ़ेस शील्ड" } }
+        {
+          "id": "cloth",
+          "mask": "cloth",
+          "label": {
+            "en": "Cloth mask",
+            "hi": "कपड़े का मास्क"
+          }
+        },
+        {
+          "id": "surgical",
+          "mask": "surgical",
+          "label": {
+            "en": "Surgical mask",
+            "hi": "सर्जिकल मास्क"
+          }
+        },
+        {
+          "id": "n95",
+          "mask": "n95",
+          "label": {
+            "en": "N95 only",
+            "hi": "केवल N95"
+          }
+        },
+        {
+          "id": "n95eye",
+          "mask": "n95",
+          "label": {
+            "en": "N95 + goggles or face shield",
+            "hi": "N95 + गॉगल्स या फ़ेस शील्ड"
+          }
+        }
       ],
       "tasks": [
         {
@@ -44,7 +262,11 @@
             "en": "Triage desk at the entrance, 2 m from patients, behind a screen",
             "hi": "प्रवेश पर ट्राइएज डेस्क, मरीज़ों से 2 मीटर दूर, स्क्रीन के पीछे"
           },
-          "correct": ["surgical", "n95", "n95eye"],
+          "correct": [
+            "surgical",
+            "n95",
+            "n95eye"
+          ],
           "best": "surgical",
           "explain": {
             "en": "At a distance with a barrier, a surgical mask is reasonable and saves N95s for close contact. An N95 also works, but stock is limited.",
@@ -57,7 +279,9 @@
             "en": "Ambulance transfer: you sit next to the coughing patient for 25 minutes",
             "hi": "एम्बुलेंस ट्रांसफ़र: आप 25 मिनट तक खाँसते मरीज़ के बगल में बैठते हैं"
           },
-          "correct": ["n95eye"],
+          "correct": [
+            "n95eye"
+          ],
           "best": "n95eye",
           "setsPlayerMask": true,
           "explain": {
@@ -67,8 +291,13 @@
         },
         {
           "id": "agp",
-          "prompt": { "en": "Airway suctioning in the isolation room", "hi": "आइसोलेशन रूम में वायुमार्ग की सक्शनिंग" },
-          "correct": ["n95eye"],
+          "prompt": {
+            "en": "Airway suctioning in the isolation room",
+            "hi": "आइसोलेशन रूम में वायुमार्ग की सक्शनिंग"
+          },
+          "correct": [
+            "n95eye"
+          ],
           "best": "n95eye",
           "explain": {
             "en": "Suctioning generates aerosols. N95 plus face shield or goggles, gown, gloves, in an isolation room. Never a surgical or cloth mask.",
@@ -80,7 +309,10 @@
     {
       "kind": "stock",
       "id": "stock",
-      "title": { "en": "Check the stockpile", "hi": "स्टॉक की जाँच करें" },
+      "title": {
+        "en": "Check the stockpile",
+        "hi": "स्टॉक की जाँच करें"
+      },
       "hint": {
         "en": "Today is 18 Nov 2026. Decide which masks the team can use.",
         "hi": "आज 18 नवंबर 2026 है। तय करें कि टीम कौन से मास्क इस्तेमाल कर सकती है।"
@@ -88,14 +320,26 @@
       "items": [
         {
           "id": "A",
-          "name": { "en": "N95, box 1", "hi": "N95, डिब्बा 1" },
-          "detail": { "en": "Sealed pack. Expiry 06/2028. Straps elastic.", "hi": "सील पैक। एक्सपायरी 06/2028। पट्टियाँ लचीली।" },
+          "name": {
+            "en": "N95, box 1",
+            "hi": "N95, डिब्बा 1"
+          },
+          "detail": {
+            "en": "Sealed pack. Expiry 06/2028. Straps elastic.",
+            "hi": "सील पैक। एक्सपायरी 06/2028। पट्टियाँ लचीली।"
+          },
           "usable": true,
-          "explain": { "en": "Good to use.", "hi": "इस्तेमाल के लिए ठीक।" }
+          "explain": {
+            "en": "Good to use.",
+            "hi": "इस्तेमाल के लिए ठीक।"
+          }
         },
         {
           "id": "B",
-          "name": { "en": "N95, box 2", "hi": "N95, डिब्बा 2" },
+          "name": {
+            "en": "N95, box 2",
+            "hi": "N95, डिब्बा 2"
+          },
           "detail": {
             "en": "Sealed pack. Expiry 03/2025. Straps feel loose and crack when stretched.",
             "hi": "सील पैक। एक्सपायरी 03/2025। पट्टियाँ ढीली हैं और खींचने पर चटकती हैं।"
@@ -108,8 +352,14 @@
         },
         {
           "id": "C",
-          "name": { "en": "N95 with exhalation valve", "hi": "वाल्व वाला N95" },
-          "detail": { "en": "In date. Has a round plastic valve on the front.", "hi": "एक्सपायरी ठीक। सामने गोल प्लास्टिक वाल्व है।" },
+          "name": {
+            "en": "N95 with exhalation valve",
+            "hi": "वाल्व वाला N95"
+          },
+          "detail": {
+            "en": "In date. Has a round plastic valve on the front.",
+            "hi": "एक्सपायरी ठीक। सामने गोल प्लास्टिक वाल्व है।"
+          },
           "usable": false,
           "explain": {
             "en": "The valve protects you, but lets your unfiltered breath out. In patient care and sterile areas, use valveless N95s so you do not spread infection if you are infected yourself.",
@@ -118,7 +368,10 @@
         },
         {
           "id": "D",
-          "name": { "en": "N95, loose in a cardboard box", "hi": "N95, गत्ते के डिब्बे में खुले" },
+          "name": {
+            "en": "N95, loose in a cardboard box",
+            "hi": "N95, गत्ते के डिब्बे में खुले"
+          },
           "detail": {
             "en": "No packaging. Box was stored under a leaking AC unit; masks are damp and creased.",
             "hi": "पैकिंग नहीं। डिब्बा टपकते AC के नीचे रखा था; मास्क गीले और मुड़े हुए हैं।"
@@ -131,7 +384,10 @@
         },
         {
           "id": "E",
-          "name": { "en": "N95, box 3 (different model)", "hi": "N95, डिब्बा 3 (दूसरा मॉडल)" },
+          "name": {
+            "en": "N95, box 3 (different model)",
+            "hi": "N95, डिब्बा 3 (दूसरा मॉडल)"
+          },
           "detail": {
             "en": "Sealed. Expiry 11/2027. NIOSH/BIS marking printed on the mask.",
             "hi": "सील पैक। एक्सपायरी 11/2027। मास्क पर NIOSH/BIS मार्किंग छपी है।"
@@ -144,7 +400,10 @@
         },
         {
           "id": "F",
-          "name": { "en": "\"N95\" with no markings", "hi": "बिना मार्किंग वाला \"N95\"" },
+          "name": {
+            "en": "\"N95\" with no markings",
+            "hi": "बिना मार्किंग वाला \"N95\""
+          },
           "detail": {
             "en": "Bought locally during a shortage. No standard or manufacturer printed on it. Ear loops, not head straps.",
             "hi": "कमी के समय लोकल खरीदा गया। उस पर कोई मानक या निर्माता नहीं छपा। सिर की पट्टी नहीं, कान के लूप।"
@@ -160,18 +419,45 @@
     {
       "kind": "sequence",
       "id": "don",
-      "title": { "en": "Put on your PPE in the right order", "hi": "PPE सही क्रम में पहनें" },
-      "hint": { "en": "Tap the steps in order.", "hi": "चरणों को क्रम से टैप करें।" },
+      "title": {
+        "en": "Put on your PPE in the right order",
+        "hi": "PPE सही क्रम में पहनें"
+      },
+      "hint": {
+        "en": "Tap the steps in order.",
+        "hi": "चरणों को क्रम से टैप करें।"
+      },
       "steps": [
-        { "en": "Hand hygiene", "hi": "हाथों की सफ़ाई" },
-        { "en": "Gown", "hi": "गाउन" },
-        { "en": "N95", "hi": "N95" },
-        { "en": "Seal check", "hi": "सील चेक" },
-        { "en": "Goggles or face shield", "hi": "गॉगल्स या फ़ेस शील्ड" },
-        { "en": "Gloves (over gown cuffs)", "hi": "दस्ताने (गाउन की कफ़ के ऊपर)" }
+        {
+          "en": "Hand hygiene",
+          "hi": "हाथों की सफ़ाई"
+        },
+        {
+          "en": "Gown",
+          "hi": "गाउन"
+        },
+        {
+          "en": "N95",
+          "hi": "N95"
+        },
+        {
+          "en": "Seal check",
+          "hi": "सील चेक"
+        },
+        {
+          "en": "Goggles or face shield",
+          "hi": "गॉगल्स या फ़ेस शील्ड"
+        },
+        {
+          "en": "Gloves (over gown cuffs)",
+          "hi": "दस्ताने (गाउन की कफ़ के ऊपर)"
+        }
       ],
       "mistakeCode": "don_order",
-      "mistakeGroup": { "en": "Put on PPE out of order", "hi": "PPE गलत क्रम में पहना" },
+      "mistakeGroup": {
+        "en": "Put on PPE out of order",
+        "hi": "PPE गलत क्रम में पहना"
+      },
       "explain": {
         "en": "Clean hands first, gown, then mask and seal check before anything covers your face, then eye protection, and gloves last so they cover the gown cuffs.",
         "hi": "पहले साफ़ हाथ, फिर गाउन, फिर मास्क और चेहरे पर कुछ और लगाने से पहले सील चेक, फिर आँखों की सुरक्षा, और आखिर में दस्ताने ताकि वे गाउन की कफ़ को ढकें।"
@@ -180,7 +466,10 @@
     {
       "kind": "seal",
       "id": "seal",
-      "title": { "en": "Get a good seal", "hi": "अच्छा सील बनाएँ" },
+      "title": {
+        "en": "Get a good seal",
+        "hi": "अच्छा सील बनाएँ"
+      },
       "hint": {
         "en": "You put on the N95. Cover it with both hands and breathe out sharply. Where do you feel air escaping? Fix each leak.",
         "hi": "आपने N95 पहन लिया। दोनों हाथों से ढकें और ज़ोर से साँस छोड़ें। हवा कहाँ से निकल रही है? हर लीक ठीक करें।"
@@ -190,7 +479,10 @@
           "id": "pinch",
           "harmful": true,
           "reopens": "nose",
-          "label": { "en": "Pinch the nose clip with one hand", "hi": "एक हाथ से नाक की क्लिप दबाएँ" },
+          "label": {
+            "en": "Pinch the nose clip with one hand",
+            "hi": "एक हाथ से नाक की क्लिप दबाएँ"
+          },
           "explain": {
             "en": "Pinching with one hand bends the clip into a V and leaves gaps on both sides of the nose.",
             "hi": "एक हाथ से दबाने पर क्लिप V आकार में मुड़ जाती है और नाक के दोनों तरफ़ गैप रह जाता है।"
@@ -199,33 +491,63 @@
         {
           "id": "mould",
           "fixes": "nose",
-          "label": { "en": "Mould the nose clip with fingertips of both hands, from the middle outwards", "hi": "दोनों हाथों की उँगलियों से नाक की क्लिप को बीच से बाहर की ओर दबाकर आकार दें" },
-          "explain": { "en": "Good. The clip now follows the shape of your nose.", "hi": "बढ़िया। क्लिप अब आपकी नाक के आकार में है।" }
+          "label": {
+            "en": "Mould the nose clip with fingertips of both hands, from the middle outwards",
+            "hi": "दोनों हाथों की उँगलियों से नाक की क्लिप को बीच से बाहर की ओर दबाकर आकार दें"
+          },
+          "explain": {
+            "en": "Good. The clip now follows the shape of your nose.",
+            "hi": "बढ़िया। क्लिप अब आपकी नाक के आकार में है।"
+          }
         },
         {
           "id": "straps",
           "fixes": "side",
-          "label": { "en": "Top strap high on the crown, bottom strap at the back of the neck below the ears", "hi": "ऊपर की पट्टी सिर के ऊपरी हिस्से पर, नीचे की पट्टी कानों के नीचे गर्दन के पीछे" },
-          "explain": { "en": "Good. Correct strap position pulls the sides flat against your cheeks.", "hi": "बढ़िया। पट्टियों की सही जगह से किनारे गालों से चिपक जाते हैं।" }
+          "label": {
+            "en": "Top strap high on the crown, bottom strap at the back of the neck below the ears",
+            "hi": "ऊपर की पट्टी सिर के ऊपरी हिस्से पर, नीचे की पट्टी कानों के नीचे गर्दन के पीछे"
+          },
+          "explain": {
+            "en": "Good. Correct strap position pulls the sides flat against your cheeks.",
+            "hi": "बढ़िया। पट्टियों की सही जगह से किनारे गालों से चिपक जाते हैं।"
+          }
         },
         {
           "id": "cross",
           "harmful": true,
           "reopens": "side",
-          "label": { "en": "Cross the straps to make them tighter", "hi": "पट्टियों को कसने के लिए क्रॉस करें" },
-          "explain": { "en": "Crossing straps distorts the mask and opens gaps at the sides.", "hi": "पट्टियाँ क्रॉस करने से मास्क टेढ़ा होता है और किनारों पर गैप बनते हैं।" }
+          "label": {
+            "en": "Cross the straps to make them tighter",
+            "hi": "पट्टियों को कसने के लिए क्रॉस करें"
+          },
+          "explain": {
+            "en": "Crossing straps distorts the mask and opens gaps at the sides.",
+            "hi": "पट्टियाँ क्रॉस करने से मास्क टेढ़ा होता है और किनारों पर गैप बनते हैं।"
+          }
         },
         {
           "id": "chin",
           "fixes": "chin",
-          "label": { "en": "Pull the bottom of the mask down under your chin", "hi": "मास्क का निचला हिस्सा ठोड़ी के नीचे तक खींचें" },
-          "explain": { "en": "Good. The mask now cups your chin.", "hi": "बढ़िया। मास्क अब ठोड़ी को ढक रहा है।" }
+          "label": {
+            "en": "Pull the bottom of the mask down under your chin",
+            "hi": "मास्क का निचला हिस्सा ठोड़ी के नीचे तक खींचें"
+          },
+          "explain": {
+            "en": "Good. The mask now cups your chin.",
+            "hi": "बढ़िया। मास्क अब ठोड़ी को ढक रहा है।"
+          }
         },
         {
           "id": "tape",
           "harmful": true,
-          "label": { "en": "Stuff tissue into the gaps", "hi": "गैप में टिश्यू भर दें" },
-          "explain": { "en": "Never put anything between the mask and your face. It creates a channel for air to leak in.", "hi": "मास्क और चेहरे के बीच कभी कुछ न रखें। इससे हवा अंदर आने का रास्ता बनता है।" }
+          "label": {
+            "en": "Stuff tissue into the gaps",
+            "hi": "गैप में टिश्यू भर दें"
+          },
+          "explain": {
+            "en": "Never put anything between the mask and your face. It creates a channel for air to leak in.",
+            "hi": "मास्क और चेहरे के बीच कभी कुछ न रखें। इससे हवा अंदर आने का रास्ता बनता है।"
+          }
         }
       ],
       "passed": {
@@ -244,8 +566,14 @@
     {
       "kind": "buddy",
       "id": "buddy",
-      "title": { "en": "Buddy check your team", "hi": "अपनी टीम का बडी चेक करें" },
-      "hint": { "en": "Before the ambulance leaves, look at each teammate. Watch the meter at the top.", "hi": "एम्बुलेंस निकलने से पहले हर साथी को देखें। ऊपर मीटर देखते रहें।" },
+      "title": {
+        "en": "Buddy check your team",
+        "hi": "अपनी टीम का बडी चेक करें"
+      },
+      "hint": {
+        "en": "Before the ambulance leaves, look at each teammate. Watch the meter at the top.",
+        "hi": "एम्बुलेंस निकलने से पहले हर साथी को देखें। ऊपर मीटर देखते रहें।"
+      },
       "mates": [
         {
           "member": "ravi",
@@ -258,7 +586,10 @@
               "id": "fine",
               "ok": false,
               "leakage": 0.35,
-              "label": { "en": "Looks fine, carry on", "hi": "ठीक लगता है, चलने दें" },
+              "label": {
+                "en": "Looks fine, carry on",
+                "hi": "ठीक लगता है, चलने दें"
+              },
               "explain": {
                 "en": "Facial hair under the seal can let in a large share of air. Ravi now has the worst protection on the team.",
                 "hi": "सील के नीचे दाढ़ी से बहुत सारी हवा अंदर आ सकती है। अब रवि की सुरक्षा टीम में सबसे कमज़ोर है।"
@@ -268,14 +599,23 @@
               "id": "tighten",
               "ok": false,
               "leakage": 0.25,
-              "label": { "en": "Tighten his straps hard", "hi": "उसकी पट्टियाँ ज़ोर से कस दें" },
-              "explain": { "en": "Tighter straps do not seal over stubble, and they hurt. The gap stays.", "hi": "कसी पट्टियाँ दाढ़ी के ऊपर सील नहीं बनातीं, और दर्द देती हैं। गैप बना रहता है।" }
+              "label": {
+                "en": "Tighten his straps hard",
+                "hi": "उसकी पट्टियाँ ज़ोर से कस दें"
+              },
+              "explain": {
+                "en": "Tighter straps do not seal over stubble, and they hurt. The gap stays.",
+                "hi": "कसी पट्टियाँ दाढ़ी के ऊपर सील नहीं बनातीं, और दर्द देती हैं। गैप बना रहता है।"
+              }
             },
             {
               "id": "reassign",
               "ok": true,
               "leakage": 0.05,
-              "label": { "en": "Move him to the triage desk role and send the clean-shaven member to the ambulance", "hi": "उसे ट्राइएज डेस्क पर भेजें और क्लीन-शेव साथी को एम्बुलेंस में" },
+              "label": {
+                "en": "Move him to the triage desk role and send the clean-shaven member to the ambulance",
+                "hi": "उसे ट्राइएज डेस्क पर भेजें और क्लीन-शेव साथी को एम्बुलेंस में"
+              },
               "explain": {
                 "en": "Good call. Reassign until he can shave, or use a loose-fitting powered respirator (PAPR) if one is available.",
                 "hi": "सही फ़ैसला। जब तक वह शेव न कर ले, काम बदलें, या अगर उपलब्ध हो तो ढीला पावर्ड रेस्पिरेटर (PAPR) इस्तेमाल करें।"
@@ -294,34 +634,58 @@
               "id": "adjust",
               "ok": true,
               "leakage": 0.04,
-              "label": { "en": "Ask her to move the strap below her ears and redo the seal check", "hi": "उससे पट्टी कानों के नीचे करने और सील चेक दोबारा करने को कहें" },
-              "explain": { "en": "Right. Straps over the ears tilt the mask and open the lower edge.", "hi": "सही। कानों पर पट्टी से मास्क झुकता है और नीचे का किनारा खुलता है।" }
+              "label": {
+                "en": "Ask her to move the strap below her ears and redo the seal check",
+                "hi": "उससे पट्टी कानों के नीचे करने और सील चेक दोबारा करने को कहें"
+              },
+              "explain": {
+                "en": "Right. Straps over the ears tilt the mask and open the lower edge.",
+                "hi": "सही। कानों पर पट्टी से मास्क झुकता है और नीचे का किनारा खुलता है।"
+              }
             },
             {
               "id": "leave",
               "ok": false,
               "leakage": 0.2,
-              "label": { "en": "Leave it, comfort matters for long shifts", "hi": "रहने दें, लंबी शिफ़्ट में आराम ज़रूरी है" },
-              "explain": { "en": "Comfort matters, but this position leaks. Help her adjust, and plan breaks instead.", "hi": "आराम ज़रूरी है, पर ऐसे लीक होता है। उसकी मदद करें, और ब्रेक की योजना बनाएँ।" }
+              "label": {
+                "en": "Leave it, comfort matters for long shifts",
+                "hi": "रहने दें, लंबी शिफ़्ट में आराम ज़रूरी है"
+              },
+              "explain": {
+                "en": "Comfort matters, but this position leaks. Help her adjust, and plan breaks instead.",
+                "hi": "आराम ज़रूरी है, पर ऐसे लीक होता है। उसकी मदद करें, और ब्रेक की योजना बनाएँ।"
+              }
             }
           ]
         },
         {
           "member": "faiz",
-          "detail": { "en": "Mask moulded at the nose, straps placed correctly, seal check done in front of you.", "hi": "नाक पर मास्क का आकार ठीक, पट्टियाँ सही जगह, आपके सामने सील चेक किया।" },
+          "detail": {
+            "en": "Mask moulded at the nose, straps placed correctly, seal check done in front of you.",
+            "hi": "नाक पर मास्क का आकार ठीक, पट्टियाँ सही जगह, आपके सामने सील चेक किया।"
+          },
           "options": [
             {
               "id": "praise",
               "ok": true,
               "leakage": 0.04,
-              "label": { "en": "All good, give a thumbs up", "hi": "सब ठीक है, शाबाशी दें" },
-              "explain": { "en": "Yes. A buddy check also means saying when someone has it right.", "hi": "हाँ। बडी चेक का मतलब यह भी है कि जब कोई सही करे तो बताएँ।" }
+              "label": {
+                "en": "All good, give a thumbs up",
+                "hi": "सब ठीक है, शाबाशी दें"
+              },
+              "explain": {
+                "en": "Yes. A buddy check also means saying when someone has it right.",
+                "hi": "हाँ। बडी चेक का मतलब यह भी है कि जब कोई सही करे तो बताएँ।"
+              }
             },
             {
               "id": "redo",
               "ok": false,
               "leakage": 0.04,
-              "label": { "en": "Make him redo everything to be safe", "hi": "सुरक्षा के लिए सब कुछ दोबारा करवाएँ" },
+              "label": {
+                "en": "Make him redo everything to be safe",
+                "hi": "सुरक्षा के लिए सब कुछ दोबारा करवाएँ"
+              },
               "explain": {
                 "en": "His fit was fine. Redoing correct work wastes time and masks during an emergency.",
                 "hi": "उसका फिट ठीक था। इमरजेंसी में सही काम दोबारा करवाने से समय और मास्क बर्बाद होते हैं।"
@@ -347,27 +711,51 @@
         "hi": "ज़्यादातर खुद का संक्रमण उतारते समय होता है। चरणों को क्रम से टैप करें। जाल से बचें।"
       },
       "steps": [
-        { "en": "Remove gloves (glove-in-glove)", "hi": "दस्ताने उतारें (दस्ताने के अंदर दस्ताना)" },
-        { "en": "Hand hygiene", "hi": "हाथों की सफ़ाई" },
-        { "en": "Remove gown, rolling it inside out", "hi": "गाउन उतारें, अंदर की ओर लपेटते हुए" },
-        { "en": "Remove goggles by the strap from behind", "hi": "गॉगल्स पीछे की पट्टी से उतारें" },
-        { "en": "Step out of the room", "hi": "कमरे से बाहर आएँ" },
+        {
+          "en": "Remove gloves (glove-in-glove)",
+          "hi": "दस्ताने उतारें (दस्ताने के अंदर दस्ताना)"
+        },
+        {
+          "en": "Hand hygiene",
+          "hi": "हाथों की सफ़ाई"
+        },
+        {
+          "en": "Remove gown, rolling it inside out",
+          "hi": "गाउन उतारें, अंदर की ओर लपेटते हुए"
+        },
+        {
+          "en": "Remove goggles by the strap from behind",
+          "hi": "गॉगल्स पीछे की पट्टी से उतारें"
+        },
+        {
+          "en": "Step out of the room",
+          "hi": "कमरे से बाहर आएँ"
+        },
         {
           "en": "Remove N95: bottom strap, then top strap, without touching the front",
           "hi": "N95 उतारें: पहले नीचे की पट्टी, फिर ऊपर की, सामने का हिस्सा छुए बिना"
         },
-        { "en": "Hand hygiene", "hi": "हाथों की सफ़ाई" }
+        {
+          "en": "Hand hygiene",
+          "hi": "हाथों की सफ़ाई"
+        }
       ],
       "traps": [
         {
-          "label": { "en": "Pull the N95 off by the front", "hi": "N95 को सामने से पकड़कर खींचें" },
+          "label": {
+            "en": "Pull the N95 off by the front",
+            "hi": "N95 को सामने से पकड़कर खींचें"
+          },
           "explain": {
             "en": "The front of the mask is the most contaminated surface. Touching it moves virus to your hands and face.",
             "hi": "मास्क का सामने वाला हिस्सा सबसे ज़्यादा दूषित होता है। उसे छूने से वायरस आपके हाथों और चेहरे तक पहुँचता है।"
           }
         },
         {
-          "label": { "en": "Adjust goggles with gloved hands", "hi": "दस्ताने पहने हाथों से गॉगल्स ठीक करें" },
+          "label": {
+            "en": "Adjust goggles with gloved hands",
+            "hi": "दस्ताने पहने हाथों से गॉगल्स ठीक करें"
+          },
           "explain": {
             "en": "Contaminated gloves near your eyes is a classic route of infection. Clean hands first, handle by the strap.",
             "hi": "आँखों के पास दूषित दस्ताने संक्रमण का आम रास्ता है। पहले हाथ साफ़ करें, पट्टी से पकड़ें।"
@@ -376,10 +764,115 @@
       ],
       "countsContamination": true,
       "mistakeCode": "doff_order",
-      "mistakeGroup": { "en": "Took off PPE out of order", "hi": "PPE गलत क्रम में उतारा" },
+      "mistakeGroup": {
+        "en": "Took off PPE out of order",
+        "hi": "PPE गलत क्रम में उतारा"
+      },
       "explain": {
         "en": "Gloves come off first because they are the dirtiest. Clean hands between steps. The N95 comes off last and outside the room, because the air inside may still carry virus.",
         "hi": "दस्ताने पहले उतरते हैं क्योंकि वे सबसे गंदे होते हैं। हर चरण के बीच हाथ साफ़ करें। N95 सबसे आखिर में और कमरे के बाहर उतरता है, क्योंकि अंदर की हवा में अब भी वायरस हो सकता है।"
+      }
+    },
+    {
+      "kind": "bins",
+      "id": "waste",
+      "title": {
+        "en": "Dispose, decontaminate, log",
+        "hi": "निपटान, कीटाणुशोधन, लॉग"
+      },
+      "hint": {
+        "en": "Colour codes follow India's Bio-Medical Waste Management Rules. Check your facility's chart.",
+        "hi": "रंग कोड भारत के बायो-मेडिकल वेस्ट मैनेजमेंट नियमों के अनुसार हैं। अपनी संस्था का चार्ट देखें।"
+      },
+      "bins": [
+        {
+          "id": "yellow",
+          "name": {
+            "en": "Yellow bag",
+            "hi": "पीला बैग"
+          }
+        },
+        {
+          "id": "red",
+          "name": {
+            "en": "Red bag",
+            "hi": "लाल बैग"
+          }
+        },
+        {
+          "id": "disinfect",
+          "name": {
+            "en": "Disinfect and reuse",
+            "hi": "कीटाणुरहित करें, दोबारा इस्तेमाल"
+          }
+        },
+        {
+          "id": "general",
+          "name": {
+            "en": "General waste",
+            "hi": "सामान्य कचरा"
+          }
+        }
+      ],
+      "items": [
+        {
+          "id": "n95",
+          "name": {
+            "en": "Used N95",
+            "hi": "इस्तेमाल किया N95"
+          },
+          "bin": "yellow"
+        },
+        {
+          "id": "gown",
+          "name": {
+            "en": "Used gown",
+            "hi": "इस्तेमाल किया गाउन"
+          },
+          "bin": "yellow"
+        },
+        {
+          "id": "gloves",
+          "name": {
+            "en": "Used gloves",
+            "hi": "इस्तेमाल किए दस्ताने"
+          },
+          "bin": "red"
+        },
+        {
+          "id": "goggles",
+          "name": {
+            "en": "Reusable goggles",
+            "hi": "दोबारा इस्तेमाल होने वाले गॉगल्स"
+          },
+          "bin": "disinfect"
+        }
+      ],
+      "logQuestion": {
+        "prompt": {
+          "en": "Stock log. The shelf had 40 usable N95s this morning. Your 4-person team used one each, and you rejected 15 bad masks from other boxes. What do you write as usable N95s left?",
+          "hi": "स्टॉक लॉग। आज सुबह शेल्फ़ पर 40 इस्तेमाल लायक N95 थे। आपकी 4 लोगों की टीम ने एक-एक इस्तेमाल किया, और आपने दूसरे डिब्बों से 15 खराब मास्क हटाए। आप बचे हुए इस्तेमाल लायक N95 कितने लिखेंगे?"
+        },
+        "options": [
+          21,
+          36,
+          25,
+          40
+        ],
+        "answer": 36,
+        "explain": {
+          "en": "36. The 15 rejected masks were never counted as usable, so only the 4 used come off. Log the rejects separately with their box and reason, so the buyer can replace them before the next outbreak.",
+          "hi": "36। हटाए गए 15 मास्क कभी इस्तेमाल लायक गिने ही नहीं गए थे, इसलिए सिर्फ़ इस्तेमाल हुए 4 घटेंगे। हटाए गए मास्क अलग से डिब्बे और कारण के साथ दर्ज करें, ताकि अगले प्रकोप से पहले उन्हें बदला जा सके।"
+        }
+      }
+    },
+    {
+      "kind": "quiz",
+      "id": "post",
+      "phase": "post",
+      "title": {
+        "en": "Quick check after the drill",
+        "hi": "ड्रिल के बाद एक छोटी जाँच"
       }
     }
   ]

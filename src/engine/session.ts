@@ -1,5 +1,6 @@
 import noteTemplates from '../content/mistake-notes.json';
-import { LEAK_SITES, type BuddyScreen, type ChoiceScreen, type LeakSite, type Scenario, type ScreenDef, type SealScreen, type SequenceScreen, type StockScreen } from './scenario';
+import { cleanContext, type Role, type RunContext } from './context';
+import { LEAK_SITES, type BinsScreen, type BuddyScreen, type ChoiceScreen, type QuizScreen, type LeakSite, type Scenario, type ScreenDef, type SealScreen, type SequenceScreen, type StockScreen } from './scenario';
 import { memberLeakage, type LeakageFault, type MaskKind, type ScoredMember } from './scoring';
 import { isSequenceComplete, sequenceCards, startSequence, tapCard, type SequenceState, type TapOutcome } from './sequence';
 import { fillText, type Text } from './text';
@@ -31,7 +32,22 @@ export type ScreenProgress =
   /** `open`: leak sites still leaking. `harmDone`: harmful action ids used. `last`: the action whose explanation shows. */
   | { kind: 'seal'; open: readonly LeakSite[]; harmDone: readonly string[]; last: string | null }
   /** Option id picked for each teammate checked so far, keyed by member id. */
-  | { kind: 'buddy'; picks: Readonly<Record<string, string>> };
+  | { kind: 'buddy'; picks: Readonly<Record<string, string>> }
+  /** Bin id chosen for each item so far, and the number written in the stock log. */
+  | { kind: 'bins'; placed: Readonly<Record<string, string>>; logAnswer: number | null }
+  /** Ratings are 1 to 5. `answers` holds the option id picked for each quiz item; both can be changed until the player moves on. */
+  | { kind: 'quiz'; confidence: number | null; answers: Readonly<Record<string, string>>; comfort: number | null; willingToWear: number | null };
+
+export type RatingScale = 'confidence' | 'comfort' | 'willingToWear';
+
+/** One side of the before/after comparison. */
+export interface QuizResult {
+  confidence: number;
+  score: number;
+  max: number;
+  comfort?: number;
+  willingToWear?: number;
+}
 
 export interface SessionState {
   scenarioId: string;
@@ -44,6 +60,13 @@ export interface SessionState {
   fits: Readonly<Record<string, MemberFit>>;
   /** Keyed by screen id. Screens with nothing to answer (briefing) have no entry. */
   progress: Readonly<Record<string, ScreenProgress>>;
+  /** Optional role and trainer code given on the pre-check. Never anything that names a person. */
+  context: RunContext;
+  /** Clock readings in ms, for the run's duration. */
+  startedAt: number;
+  finishedAt: number | null;
+  /** True once this run's result has been written to the phone, so it is written only once. */
+  resultSaved: boolean;
 }
 
 export type Action =
@@ -53,10 +76,19 @@ export type Action =
   | { type: 'decideStock'; itemId: string; use: boolean }
   | { type: 'tapCard'; cardId: string }
   | { type: 'sealAction'; actionId: string }
-  | { type: 'buddyPick'; memberId: string; optionId: string };
+  | { type: 'buddyPick'; memberId: string; optionId: string }
+  | { type: 'binItem'; itemId: string; binId: string }
+  | { type: 'answerLog'; value: number }
+  | { type: 'rate'; scale: RatingScale; value: number }
+  | { type: 'answerQuiz'; itemId: string; optionId: string }
+  /** A field left out is kept; `null` or an empty code clears it. */
+  | { type: 'setContext'; role?: Role | null; trainerCode?: string }
+  | { type: 'resultSaved' };
 
 /** Returns a number in [0, 1), like Math.random. Injected so tests can fix the card order. */
 export type Rng = () => number;
+/** Returns the time in ms, like Date.now. Injected so tests can fix the run's duration. */
+export type Clock = () => number;
 
 const PLAYER = 'you';
 
@@ -81,12 +113,16 @@ function freshProgress(screen: ScreenDef, rng: Rng): ScreenProgress | null {
       return { kind: 'seal', open: [...LEAK_SITES], harmDone: [], last: null };
     case 'buddy':
       return { kind: 'buddy', picks: {} };
+    case 'bins':
+      return { kind: 'bins', placed: {}, logAnswer: null };
+    case 'quiz':
+      return { kind: 'quiz', confidence: null, answers: {}, comfort: null, willingToWear: null };
     default:
       return null;
   }
 }
 
-export function startSession(scenario: Scenario, rng: Rng = Math.random): SessionState {
+export function startSession(scenario: Scenario, rng: Rng = Math.random, now: Clock = Date.now): SessionState {
   const progress: Record<string, ScreenProgress> = {};
   for (const screen of scenario.screens) {
     const p = freshProgress(screen, rng);
@@ -94,7 +130,7 @@ export function startSession(scenario: Scenario, rng: Rng = Math.random): Sessio
   }
   const fits: Record<string, MemberFit> = {};
   for (const m of scenario.team) fits[m.id] = { mask: null, faults: [] };
-  return { scenarioId: scenario.id, index: 0, finished: false, mistakes: [], contaminationEvents: 0, fits, progress };
+  return { scenarioId: scenario.id, index: 0, finished: false, mistakes: [], contaminationEvents: 0, fits, progress, context: {}, startedAt: now(), finishedAt: null, resultSaved: false };
 }
 
 /** The screen the player is on, or null once the drill is finished. */
@@ -112,7 +148,50 @@ export function canAdvance(scenario: Scenario, state: SessionState): boolean {
   if (screen.kind === 'sequence' && p?.kind === 'sequence') return isSequenceComplete(screen, p.seq);
   if (screen.kind === 'seal' && p?.kind === 'seal') return p.open.length === 0;
   if (screen.kind === 'buddy' && p?.kind === 'buddy') return screen.mates.every((m) => m.member in p.picks);
+  if (screen.kind === 'bins' && p?.kind === 'bins') return screen.items.every((it) => it.id in p.placed) && (!screen.logQuestion || p.logAnswer !== null);
+  if (screen.kind === 'quiz' && p?.kind === 'quiz') {
+    const answered = p.confidence !== null && (scenario.quiz?.items ?? []).every((it) => it.id in p.answers);
+    return answered && (screen.phase === 'pre' || (p.comfort !== null && p.willingToWear !== null));
+  }
   return true;
+}
+
+/** Where the player is among the drill's own steps. The pre and post check are not steps, so there it is null. */
+export function drillStep(scenario: Scenario, state: SessionState): { n: number; total: number } | null {
+  const screen = currentScreen(scenario, state);
+  if (!screen || screen.kind === 'quiz') return null;
+  const steps = scenario.screens.filter((s) => s.kind !== 'quiz');
+  return { n: steps.indexOf(screen) + 1, total: steps.length };
+}
+
+/** The pre-check or post-check as answered, or null if it is not complete yet. */
+export function quizResult(scenario: Scenario, state: SessionState, phase: 'pre' | 'post'): QuizResult | null {
+  const screen = scenario.screens.find((s) => s.kind === 'quiz' && s.phase === phase);
+  const p = screen && state.progress[screen.id];
+  const items = scenario.quiz?.items ?? [];
+  if (p?.kind !== 'quiz' || p.confidence === null || !items.every((it) => it.id in p.answers)) return null;
+  const result: QuizResult = { confidence: p.confidence, score: items.filter((it) => p.answers[it.id] === it.correct).length, max: items.length };
+  if (phase === 'post' && p.comfort !== null) result.comfort = p.comfort;
+  if (phase === 'post' && p.willingToWear !== null) result.willingToWear = p.willingToWear;
+  return result;
+}
+
+/**
+ * Mistakes as the results screen lists them. Out-of-order taps in a sequence collapse
+ * into one line with a count ("Took off PPE out of order" x3); everything else is listed by its note.
+ */
+export function groupMistakes(scenario: Scenario, mistakes: readonly Mistake[]): { label: Text; count: number }[] {
+  const groupLabel = new Map<string, Text>();
+  for (const s of scenario.screens) if (s.kind === 'sequence' && s.mistakeGroup) groupLabel.set(s.mistakeCode, s.mistakeGroup);
+  const groups = new Map<string, { label: Text; count: number }>();
+  for (const m of mistakes) {
+    const shared = groupLabel.get(m.code);
+    const key = shared ? m.code : `${m.code}|${m.note.en}`;
+    const g = groups.get(key) ?? { label: shared ?? m.note, count: 0 };
+    g.count += 1;
+    groups.set(key, g);
+  }
+  return [...groups.values()];
 }
 
 function fitLeakage(fit: MemberFit): number | null {
@@ -226,19 +305,69 @@ function buddyPick(scenario: Scenario, screen: BuddyScreen, state: SessionState,
   return withMistake(s, { code: `buddy_${memberId}`, screenId: screen.id, note: fillText(noteTemplates.buddyChoice, { name, option: option.label }) });
 }
 
+function binItem(screen: BinsScreen, state: SessionState, itemId: string, binId: string): SessionState {
+  const p = state.progress[screen.id];
+  const item = screen.items.find((it) => it.id === itemId);
+  const bin = screen.bins.find((b) => b.id === binId);
+  if (p?.kind !== 'bins' || !item || !bin || itemId in p.placed) return state;
+  const s = withProgress(state, screen.id, { ...p, placed: { ...p.placed, [itemId]: binId } });
+  if (item.bin === binId) return s;
+  return withMistake(s, { code: `waste_${item.id}`, screenId: screen.id, note: fillText(noteTemplates.wrongBin, { item: item.name, bin: bin.name }) });
+}
+
+function answerLog(screen: BinsScreen, state: SessionState, value: number): SessionState {
+  const p = state.progress[screen.id];
+  const q = screen.logQuestion;
+  if (p?.kind !== 'bins' || !q || p.logAnswer !== null || !q.options.includes(value)) return state;
+  const s = withProgress(state, screen.id, { ...p, logAnswer: value });
+  if (value === q.answer) return s;
+  return withMistake(s, { code: 'stock_log', screenId: screen.id, note: fillText(noteTemplates.wrongLog, { value }) });
+}
+
+function rate(screen: QuizScreen, state: SessionState, scale: RatingScale, value: number): SessionState {
+  const p = state.progress[screen.id];
+  if (p?.kind !== 'quiz' || !Number.isInteger(value) || value < 1 || value > 5) return state;
+  if (scale !== 'confidence' && screen.phase !== 'post') return state;
+  return p[scale] === value ? state : withProgress(state, screen.id, { ...p, [scale]: value });
+}
+
+function answerQuiz(scenario: Scenario, screen: QuizScreen, state: SessionState, itemId: string, optionId: string): SessionState {
+  const p = state.progress[screen.id];
+  const item = scenario.quiz?.items.find((it) => it.id === itemId);
+  if (p?.kind !== 'quiz' || !item?.options.some((o) => o.id === optionId) || p.answers[itemId] === optionId) return state;
+  return withProgress(state, screen.id, { ...p, answers: { ...p.answers, [itemId]: optionId } });
+}
+
 /**
  * The whole game as one pure function. An action that makes no sense right now
  * (wrong screen kind, already answered, not ready to advance) returns the same state,
  * so the UI can re-render or re-send freely without recording anything twice.
  */
-export function step(scenario: Scenario, state: SessionState, action: Action, rng: Rng = Math.random): SessionState {
-  if (action.type === 'restart') return startSession(scenario, rng);
+export function step(scenario: Scenario, state: SessionState, action: Action, rng: Rng = Math.random, now: Clock = Date.now): SessionState {
+  if (action.type === 'restart') return startSession(scenario, rng, now);
+  if (action.type === 'resultSaved') return state.finished && !state.resultSaved ? { ...state, resultSaved: true } : state;
   const screen = currentScreen(scenario, state);
   if (!screen) return state;
   switch (action.type) {
     case 'next':
       if (!canAdvance(scenario, state)) return state;
-      return state.index + 1 >= scenario.screens.length ? { ...state, finished: true } : { ...state, index: state.index + 1 };
+      return state.index + 1 >= scenario.screens.length ? { ...state, finished: true, finishedAt: now() } : { ...state, index: state.index + 1 };
+    case 'setContext':
+      return {
+        ...state,
+        context: cleanContext({
+          role: action.role === undefined ? state.context.role : action.role,
+          trainerCode: action.trainerCode === undefined ? state.context.trainerCode : action.trainerCode,
+        }),
+      };
+    case 'binItem':
+      return screen.kind === 'bins' ? binItem(screen, state, action.itemId, action.binId) : state;
+    case 'answerLog':
+      return screen.kind === 'bins' ? answerLog(screen, state, action.value) : state;
+    case 'rate':
+      return screen.kind === 'quiz' ? rate(screen, state, action.scale, action.value) : state;
+    case 'answerQuiz':
+      return screen.kind === 'quiz' ? answerQuiz(scenario, screen, state, action.itemId, action.optionId) : state;
     case 'pickOption':
       return screen.kind === 'choice' ? pickOption(screen, state, action.taskId, action.optionId) : state;
     case 'decideStock':

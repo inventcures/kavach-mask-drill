@@ -1,7 +1,30 @@
 {
-  "wrongChoice": { "en": "Chose {option} for: {task}", "hi": "{task} के लिए {option} चुना" },
-  "usedBadStock": { "en": "Used {item}", "hi": "{item} इस्तेमाल किया" },
-  "rejectedGoodStock": { "en": "Rejected {item}", "hi": "{item} हटाया" },
-  "buddyChoice": { "en": "{name}: {option}", "hi": "{name}: {option}" },
-  "outOfOrder": { "en": "Out of order: {step} at step {n}", "hi": "गलत क्रम: चरण {n} पर {step}" }
+  "wrongChoice": {
+    "en": "Chose {option} for: {task}",
+    "hi": "{task} के लिए {option} चुना"
+  },
+  "usedBadStock": {
+    "en": "Used {item}",
+    "hi": "{item} इस्तेमाल किया"
+  },
+  "rejectedGoodStock": {
+    "en": "Rejected {item}",
+    "hi": "{item} हटाया"
+  },
+  "buddyChoice": {
+    "en": "{name}: {option}",
+    "hi": "{name}: {option}"
+  },
+  "outOfOrder": {
+    "en": "Out of order: {step} at step {n}",
+    "hi": "गलत क्रम: चरण {n} पर {step}"
+  },
+  "wrongBin": {
+    "en": "{item} into {bin}",
+    "hi": "{item} → {bin}"
+  },
+  "wrongLog": {
+    "en": "Stock log wrote {value}",
+    "hi": "स्टॉक लॉग में {value} लिखा"
+  }
 }

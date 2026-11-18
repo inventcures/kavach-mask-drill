@@ -1,11 +1,14 @@
 import { useEffect } from 'preact/hooks';
 import type { Scenario } from '../../engine/scenario';
-import { canAdvance, currentScreen, teamMembers, type Action, type SessionState } from '../../engine/session';
+import { canAdvance, currentScreen, drillStep, teamMembers, type Action, type SessionState } from '../../engine/session';
 import { Meter } from '../components/Meter';
 import { t, type Lang } from '../i18n';
+import { Bins } from './Bins';
 import { Briefing } from './Briefing';
 import { Buddy } from './Buddy';
 import { Choice } from './Choice';
+import { Quiz } from './Quiz';
+import { Results } from './Results';
 import { Seal } from './Seal';
 import { Sequence } from './Sequence';
 import { StockCheck } from './StockCheck';
@@ -26,35 +29,17 @@ export function Drill({ lang, scenario, session, dispatch }: Props) {
     scrollTo(0, 0);
   }, [session.index, session.finished]);
 
-  if (!screen) {
-    return (
-      <>
-        <Meter lang={lang} members={team} />
-        <main>
-          <section class="card" data-testid="drill-end">
-            <h2>{t(lang, 'drill.end.heading')}</h2>
-            <p>{t(lang, 'drill.end.body')}</p>
-            <button type="button" class="btn" disabled>
-              {t(lang, 'drill.end.continue')}
-            </button>
-          </section>
-        </main>
-        <div class="foot">
-          <button type="button" class="btn primary" onClick={() => dispatch({ type: 'restart' })}>
-            {t(lang, 'drill.restart')}
-          </button>
-        </div>
-      </>
-    );
-  }
+  if (!screen) return <Results lang={lang} scenario={scenario} session={session} onRestart={() => dispatch({ type: 'restart' })} />;
 
   const progress = session.progress[screen.id];
+  const at = drillStep(scenario, session);
+  const isLast = session.index === scenario.screens.length - 1;
   return (
     <>
       <Meter lang={lang} members={team} />
       <main>
         <section class="card" data-testid={`screen-${screen.id}`}>
-          <div class="step">{t(lang, 'drill.step', { n: session.index + 1, total: scenario.screens.length })}</div>
+          {at && <div class="step">{t(lang, 'drill.step', at)}</div>}
           {screen.kind === 'briefing' && <Briefing lang={lang} screen={screen} team={team} />}
           {screen.kind === 'choice' && progress?.kind === 'choice' && (
             <Choice lang={lang} screen={screen} picks={progress.picks} onPick={(taskId, optionId) => dispatch({ type: 'pickOption', taskId, optionId })} />
@@ -85,12 +70,25 @@ export function Drill({ lang, scenario, session, dispatch }: Props) {
               onPick={(memberId, optionId) => dispatch({ type: 'buddyPick', memberId, optionId })}
             />
           )}
+          {screen.kind === 'bins' && progress?.kind === 'bins' && (
+            <Bins
+              lang={lang}
+              screen={screen}
+              placed={progress.placed}
+              logAnswer={progress.logAnswer}
+              onPlace={(itemId, binId) => dispatch({ type: 'binItem', itemId, binId })}
+              onLog={(value) => dispatch({ type: 'answerLog', value })}
+            />
+          )}
+          {screen.kind === 'quiz' && progress?.kind === 'quiz' && scenario.quiz && (
+            <Quiz lang={lang} screen={screen} quiz={scenario.quiz} progress={progress} context={session.context} dispatch={dispatch} />
+          )}
         </section>
       </main>
       {canAdvance(scenario, session) && (
         <div class="foot">
           <button type="button" class="btn primary" onClick={() => dispatch({ type: 'next' })}>
-            {t(lang, 'drill.next')}
+            {t(lang, isLast ? 'quiz.finish' : 'drill.next')}
           </button>
         </div>
       )}

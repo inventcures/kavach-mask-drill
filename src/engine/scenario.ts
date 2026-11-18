@@ -133,14 +133,67 @@ export interface BuddyScreen {
   explain: Text;
 }
 
-/** Screen kinds whose content and behaviour arrive in later tickets. Only `kind` and `id` are checked for now. */
-export const PLACEHOLDER_KINDS = ['bins', 'quiz', 'results'] as const;
-export interface PlaceholderScreen {
-  kind: (typeof PLACEHOLDER_KINDS)[number];
-  id: string;
+/** A 1 to 5 rating, with a label for each end of the scale. */
+export interface RatingQuestion {
+  prompt: Text;
+  low: Text;
+  high: Text;
 }
 
-export type ScreenDef = BriefingScreen | ChoiceScreen | StockScreen | SequenceScreen | SealScreen | BuddyScreen | PlaceholderScreen;
+export interface QuizItem {
+  id: string;
+  prompt: Text;
+  options: { id: string; label: Text }[];
+  /** The id of the right option. */
+  correct: string;
+}
+
+/** The questions asked before and after the drill, so the two can be compared. */
+export interface QuizDef {
+  confidence: RatingQuestion;
+  items: QuizItem[];
+  /** Asked in the post-check only. */
+  comfort: RatingQuestion;
+  /** Asked in the post-check only. */
+  willingToWear: RatingQuestion;
+}
+
+/** The pre-check or post-check. The questions themselves live in `Scenario.quiz`. */
+export interface QuizScreen {
+  kind: 'quiz';
+  id: string;
+  phase: 'pre' | 'post';
+  title: Text;
+  /** A line under the title, e.g. what is stored and where. */
+  note?: Text;
+}
+
+export interface BinItem {
+  id: string;
+  name: Text;
+  /** The id of the bin this belongs in. */
+  bin: string;
+}
+
+/** One sum about the stock log, answered by picking a number. */
+export interface LogQuestion {
+  prompt: Text;
+  options: number[];
+  answer: number;
+  explain: Text;
+}
+
+export interface BinsScreen {
+  kind: 'bins';
+  id: string;
+  title: Text;
+  hint?: Text;
+  bins: { id: string; name: Text }[];
+  items: BinItem[];
+  logQuestion?: LogQuestion;
+}
+
+export type ScreenDef = BriefingScreen | ChoiceScreen | StockScreen | SequenceScreen | SealScreen | BuddyScreen | BinsScreen | QuizScreen;
 export type ScreenKind = ScreenDef['kind'];
 
 export interface Scenario {
@@ -149,6 +202,8 @@ export interface Scenario {
   track: string;
   title: Text;
   team: TeamMemberDef[];
+  /** Needed when any screen is a quiz. */
+  quiz?: QuizDef;
   screens: ScreenDef[];
 }
 
@@ -191,7 +246,31 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
 
   const isSite = (v: unknown): v is LeakSite => (LEAK_SITES as readonly unknown[]).includes(v);
 
-  const checkScreen = (s: Obj, p: string, memberIds: readonly unknown[]) => {
+  const rating = (v: unknown, path: string) => {
+    const q = isObj(v) ? v : {};
+    for (const part of ['prompt', 'low', 'high']) text(q[part], `${path}.${part}`);
+  };
+  const checkQuiz = (q: Obj) => {
+    rating(q.confidence, 'quiz.confidence');
+    rating(q.comfort, 'quiz.comfort');
+    rating(q.willingToWear, 'quiz.willingToWear');
+    const ids = new Set<unknown>();
+    list(q.items, 'quiz.items', (it, ip) => {
+      id(it.id, `${ip}.id`);
+      if (ids.has(it.id)) err(`${ip}.id`, `duplicate item id "${String(it.id)}"`);
+      ids.add(it.id);
+      text(it.prompt, `${ip}.prompt`);
+      const optionIds: unknown[] = [];
+      list(it.options, `${ip}.options`, (o, op) => {
+        id(o.id, `${op}.id`);
+        optionIds.push(o.id);
+        text(o.label, `${op}.label`);
+      }, 2, 'options');
+      if (!optionIds.includes(it.correct)) err(`${ip}.correct`, `unknown option "${String(it.correct)}"`);
+    });
+  };
+
+  const checkScreen = (s: Obj, p: string, memberIds: readonly unknown[], hasQuiz: boolean) => {
     switch (s.kind) {
       case 'briefing':
         text(s.title, `${p}.title`);
@@ -294,8 +373,38 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
         });
         break;
       }
+      case 'bins': {
+        text(s.title, `${p}.title`);
+        optionalText(s.hint, `${p}.hint`);
+        const binIds: unknown[] = [];
+        list(s.bins, `${p}.bins`, (b, bp) => {
+          id(b.id, `${bp}.id`);
+          binIds.push(b.id);
+          text(b.name, `${bp}.name`);
+        }, 2, 'bins');
+        list(s.items, `${p}.items`, (it, ip) => {
+          id(it.id, `${ip}.id`);
+          text(it.name, `${ip}.name`);
+          if (!binIds.includes(it.bin)) err(`${ip}.bin`, `unknown bin "${String(it.bin)}"`);
+        });
+        if (s.logQuestion !== undefined) {
+          const q = isObj(s.logQuestion) ? s.logQuestion : {};
+          text(q.prompt, `${p}.logQuestion.prompt`);
+          text(q.explain, `${p}.logQuestion.explain`);
+          const options = Array.isArray(q.options) ? q.options : [];
+          if (options.length < 2 || !options.every((o) => typeof o === 'number')) err(`${p}.logQuestion.options`, 'needs at least 2 numbers');
+          else if (!(options as unknown[]).includes(q.answer)) err(`${p}.logQuestion.answer`, `${String(q.answer)} is not one of the options`);
+        }
+        break;
+      }
+      case 'quiz':
+        text(s.title, `${p}.title`);
+        optionalText(s.note, `${p}.note`);
+        if (s.phase !== 'pre' && s.phase !== 'post') err(`${p}.phase`, 'must be "pre" or "post"');
+        if (!hasQuiz) err(p, 'a quiz screen needs the scenario to have a quiz');
+        break;
       default:
-        if (!(PLACEHOLDER_KINDS as readonly unknown[]).includes(s.kind)) err(`${p}.kind`, `unknown screen kind "${String(s.kind)}"`);
+        err(`${p}.kind`, `unknown screen kind "${String(s.kind)}"`);
     }
   };
 
@@ -308,12 +417,16 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
   });
   if (!team.some((m) => isObj(m) && m.id === 'you')) err('team', 'needs a member with id "you"');
   const memberIds = team.map((m) => (isObj(m) ? m.id : undefined));
+  if (raw.quiz !== undefined) {
+    if (isObj(raw.quiz)) checkQuiz(raw.quiz);
+    else err('quiz', 'must be an object');
+  }
   const seen = new Set<unknown>();
   list(raw.screens, 'screens', (s, p) => {
     id(s.id, `${p}.id`);
     if (seen.has(s.id)) err(`${p}.id`, `duplicate screen id "${String(s.id)}"`);
     seen.add(s.id);
-    checkScreen(s, p, memberIds);
+    checkScreen(s, p, memberIds, isObj(raw.quiz));
   }, 1, 'screen');
 
   return errors.length > 0 ? { ok: false, errors } : { ok: true, scenario: raw as unknown as Scenario };

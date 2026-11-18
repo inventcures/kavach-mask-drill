@@ -4,9 +4,9 @@
 
 **Blocked by:** 04
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Seam `engine/telemetry` tested first: record shape matches spec 6.4; contains no free text except the validated trainer code
-- [ ] Full drill playable end to end in both languages
-- [ ] Playwright: scripted perfect run ends at 96-97% team protection with 0 contamination events; random run reaches results with no console errors; no request leaves the app origin
-- [ ] Bundle still under 250 KB gzipped
+- [x] Seam `engine/telemetry` tested first: record shape matches spec 6.4; contains no free text except the validated trainer code
+- [x] Full drill playable end to end in both languages
+- [x] Playwright: scripted perfect run ends at 96-97% team protection with 0 contamination events; random run reaches results with no console errors; no request leaves the app origin
+- [x] Bundle still under 250 KB gzipped

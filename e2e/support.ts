@@ -23,11 +23,43 @@ export function sidewaysOverflow(page: Page): Promise<number> {
 
 const DON_ORDER = ['Hand hygiene', 'Gown', 'N95', 'Seal check', 'Goggles or face shield', 'Gloves (over gown cuffs)'];
 
+/** The right answer to each quiz item, by item id (English labels). */
+export const QUIZ_RIGHT = { seal_vs_fit: 'False', doff_hold: 'The straps, bottom one first', weakest_seal: 'The one bad seal', valve: 'False' } as const;
+
+/** Sets confidence and answers the four quiz items on the pre-check or post-check. Does not press Next. */
+export async function answerCheck(page: Page, confidence: number, answers: Record<string, string> = QUIZ_RIGHT): Promise<void> {
+  await page.getByTestId('quiz-confidence').getByRole('button', { name: String(confidence) }).click();
+  for (const [item, name] of Object.entries(answers)) await page.getByTestId(`quiz-${item}`).getByRole('button', { name, exact: true }).click();
+}
+
+/** From the home screen through the pre-check, to the first drill step (the alert). */
+export async function startDrill(page: Page): Promise<void> {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Start the drill' }).click();
+  await answerCheck(page, 2, { ...QUIZ_RIGHT, seal_vs_fit: 'True', weakest_seal: 'The three good seals' });
+  await page.getByRole('button', { name: 'Next' }).click();
+}
+
+/** Bins every item correctly and gets the stock log right. */
+export async function disposeWell(page: Page): Promise<void> {
+  for (const [item, name] of [['n95', 'Yellow bag'], ['gown', 'Yellow bag'], ['gloves', 'Red bag'], ['goggles', 'Disinfect and reuse']] as const) {
+    await page.getByTestId(`bin-${item}`).getByRole('button', { name }).click();
+  }
+  await page.getByTestId('stock-log').getByRole('button', { name: '36' }).click();
+}
+
+/** The post-check with every answer right, then on to the results. */
+export async function finishPostCheck(page: Page): Promise<void> {
+  await answerCheck(page, 4);
+  await page.getByTestId('quiz-comfort').getByRole('button', { name: '3' }).click();
+  await page.getByTestId('quiz-willing').getByRole('button', { name: '5' }).click();
+  await page.getByRole('button', { name: 'See results' }).click();
+}
+
 /** Plays the drill without a mistake from the home screen up to the seal check. */
 export async function playToSealCheck(page: Page): Promise<void> {
   const next = () => page.getByRole('button', { name: 'Next' }).click();
-  await page.goto('./');
-  await page.getByRole('button', { name: 'Start the drill' }).click();
+  await startDrill(page);
   await next();
   await page.getByTestId('task-triage').getByRole('button', { name: 'Surgical mask' }).click();
   for (const task of ['transfer', 'agp']) await page.getByTestId(`task-${task}`).getByRole('button', { name: 'N95 + goggles or face shield' }).click();

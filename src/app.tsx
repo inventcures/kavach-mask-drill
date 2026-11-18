@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { defaultScenario } from './content/scenarios';
 import { startSession, step, type Action, type SessionState } from './engine/session';
+import { buildResult, saveRun } from './engine/telemetry';
 import { LangToggle } from './ui/components/LangToggle';
 import { LANGS, loadLang, saveLang, t, type Lang } from './ui/i18n';
 import { Drill } from './ui/screens/Drill';
 import { Home } from './ui/screens/Home';
+import { phoneStore } from './ui/store';
 
 /** Wires the engine to the screens: home until the drill starts, then whatever screen the session is on. */
 export function App() {
@@ -16,6 +18,13 @@ export function App() {
     document.documentElement.lang = lang;
     document.title = t(lang, 'app.title');
   }, [lang]);
+
+  // Each finished run is written to the phone once; the flag lives in the session so a re-render cannot write it twice.
+  useEffect(() => {
+    if (!session?.finished || session.resultSaved) return;
+    saveRun(phoneStore(), buildResult(scenario, session, lang));
+    setSession((s) => s && step(scenario, s, { type: 'resultSaved' }));
+  }, [session, scenario, lang]);
 
   const changeLang = (next: Lang) => {
     saveLang(next);

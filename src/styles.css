@@ -145,3 +145,30 @@ h3 { font-size: 16px; margin: 12px 0 6px; }
 @media (prefers-reduced-motion: reduce) {
   .leak { animation: none; opacity: 1; }
 }
+
+/* Pre and post check. */
+.q { min-width: 0; margin: 0 0 14px; padding: 0; border: 0; }
+.q legend { padding: 0; margin-bottom: 6px; font-weight: 600; }
+.likert { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.likert .btn { margin: 0; padding: 12px 0; text-align: center; }
+.btn[aria-pressed='true'] { font-weight: 700; background: var(--chip); }
+.scale-ends { display: flex; justify-content: space-between; margin-top: 4px; }
+.field { display: block; margin: 0 0 10px; }
+.field span { display: block; margin-bottom: 4px; font-weight: 600; }
+.field select, .field input {
+  display: block; width: 100%; min-height: 48px; padding: 10px 12px;
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--line); border-radius: 12px; font: inherit;
+}
+
+/* Results. */
+.big { font-size: 44px; font-weight: 700; line-height: 1.1; margin: 2px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.chips .chip { padding: 4px 12px; border-radius: 14px; overflow-wrap: anywhere; }
+table { width: 100%; margin: 0 0 10px; border-collapse: collapse; font-size: 15px; }
+th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--line); }
+tbody th { font-weight: 400; }
+.remember { margin: 0; padding-left: 22px; }
+.remember li { margin-bottom: 8px; }
+.card > h3:first-child { margin-top: 0; }
+p.t { margin: 0 0 10px; }

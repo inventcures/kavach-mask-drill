@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import nipah from '../content/scenarios/nipah-kerala-01.json';
 import type { Scenario } from './scenario';
-import { canAdvance, currentScreen, startSession, step, teamMembers, type Action, type SessionState } from './session';
+import { canAdvance, currentScreen, drillStep, groupMistakes, quizResult, startSession, step, teamMembers, type Action, type SessionState } from './session';
 
 const scenario = nipah as unknown as Scenario;
 
@@ -17,7 +17,13 @@ const allTasksRight = [pick('triage', 'surgical'), pick('transfer', 'n95eye'), p
 const allStockRight = [stock('A', true), stock('B', false), stock('C', false), stock('D', false), stock('E', true), stock('F', false)];
 const donInOrder = ['s0', 's1', 's2', 's3', 's4', 's5'].map(tap);
 const doffInOrder = ['s0', 's1', 's2', 's3', 's4', 's5', 's6'].map(tap);
-const toChoice = [next];
+const rate = (scale: 'confidence' | 'comfort' | 'willingToWear', value: number): Action => ({ type: 'rate', scale, value });
+const answer = (itemId: string, optionId: string): Action => ({ type: 'answerQuiz', itemId, optionId });
+const bin = (itemId: string, binId: string): Action => ({ type: 'binItem', itemId, binId });
+const quizAllRight = [answer('seal_vs_fit', 'false'), answer('doff_hold', 'straps'), answer('weakest_seal', 'bad'), answer('valve', 'false')];
+const preCheck = [rate('confidence', 2), answer('seal_vs_fit', 'true'), answer('doff_hold', 'straps'), answer('weakest_seal', 'good'), answer('valve', 'false')];
+const toAlert = [...preCheck, next];
+const toChoice = [...toAlert, next];
 const toStock = [...toChoice, ...allTasksRight, next];
 const toDon = [...toStock, ...allStockRight, next];
 const sealAct = (actionId: string): Action => ({ type: 'sealAction', actionId });
@@ -27,13 +33,18 @@ const buddyAllRight = [buddy('ravi', 'reassign'), buddy('anjali', 'adjust'), bud
 const toSeal = [...toDon, ...donInOrder, next];
 const toBuddy = [...toSeal, ...sealFixes, next];
 const toDoff = [...toBuddy, ...buddyAllRight, next];
+const toWaste = [...toDoff, ...doffInOrder, next];
+const binsAllRight = [bin('n95', 'yellow'), bin('gown', 'yellow'), bin('gloves', 'red'), bin('goggles', 'disinfect')];
+const toPost = [...toWaste, ...binsAllRight, { type: 'answerLog', value: 36 } as Action, next];
+const postCheck = [rate('confidence', 4), ...quizAllRight, rate('comfort', 3), rate('willingToWear', 5)];
+const toResults = [...toPost, ...postCheck, next];
 
 const youLeakage = (s: SessionState) => teamMembers(scenario, s).find((m) => m.id === 'you')!.leakage;
 
 describe('session: moving through the drill', () => {
-  it('starts on the alert with nobody masked up and nothing recorded', () => {
+  it('starts on the pre-check with nobody masked up and nothing recorded', () => {
     const s = startSession(scenario);
-    expect(currentScreen(scenario, s)?.id).toBe('alert');
+    expect(currentScreen(scenario, s)?.id).toBe('pre');
     expect(s.mistakes).toEqual([]);
     expect(s.contaminationEvents).toBe(0);
     expect(teamMembers(scenario, s).map((m) => [m.id, m.name, m.leakage])).toEqual([
@@ -44,14 +55,14 @@ describe('session: moving through the drill', () => {
     ]);
   });
 
-  it('a perfect run goes alert, choice, stock, donning, seal check, buddy check, doffing, then finishes with no mistakes', () => {
+  it('a perfect run goes pre-check, the eight drill steps, post-check, then finishes with no mistakes', () => {
     const seen: (string | undefined)[] = [];
     let s = startSession(scenario);
-    for (const a of [...toDoff, ...doffInOrder, next]) {
+    for (const a of toResults) {
       seen.push(currentScreen(scenario, s)?.id);
       s = step(scenario, s, a);
     }
-    expect([...new Set(seen)]).toEqual(['alert', 'choose', 'stock', 'don', 'seal', 'buddy', 'doff']);
+    expect([...new Set(seen)]).toEqual(['pre', 'alert', 'choose', 'stock', 'don', 'seal', 'buddy', 'doff', 'waste', 'post']);
     expect(s.finished).toBe(true);
     expect(currentScreen(scenario, s)).toBeNull();
     expect(s.mistakes).toEqual([]);
@@ -80,9 +91,9 @@ describe('session: moving through the drill', () => {
 
   it('restarting clears mistakes, masks, contamination and progress', () => {
     const messy = play([...toChoice, pick('triage', 'cloth'), pick('transfer', 'cloth'), pick('agp', 'cloth'), next, stock('B', true)]);
-    const fresh = step(scenario, messy, { type: 'restart' });
-    expect({ ...fresh, progress: 0 }).toEqual({ ...startSession(scenario), progress: 0 });
-    expect(currentScreen(scenario, fresh)?.id).toBe('alert');
+    const fresh = step(scenario, messy, { type: 'restart' }, Math.random, () => 5);
+    expect({ ...fresh, progress: 0 }).toEqual({ ...startSession(scenario, Math.random, () => 5), progress: 0 });
+    expect(currentScreen(scenario, fresh)?.id).toBe('pre');
     expect(canAdvance(scenario, play(toChoice, fresh))).toBe(false);
   });
 
@@ -345,5 +356,112 @@ describe('session: buddy check', () => {
     const s = play([...toChoice, ...allTasksRight, next, ...allStockRight, next, ...donInOrder, next, sealAct('tape'), ...sealFixes, next, buddy('ravi', 'fine'), buddy('anjali', 'adjust'), buddy('faiz', 'praise')]);
     const all = teamMembers(scenario, s).map((m) => m.leakage ?? 0);
     expect(all.reduce((a, b) => a + b, 0) / all.length).toBeCloseTo(0.1225, 10);
+  });
+});
+
+describe('session: pre and post check', () => {
+  it('does not advance until confidence and every quiz item are answered', () => {
+    const partly = play(preCheck.slice(0, -1));
+    expect(canAdvance(scenario, partly)).toBe(false);
+    expect(currentScreen(scenario, step(scenario, partly, next))?.id).toBe('pre');
+    expect(currentScreen(scenario, play(toAlert))?.id).toBe('alert');
+  });
+
+  it('scores the quiz without recording wrong answers as mistakes', () => {
+    const s = play(toAlert);
+    expect(quizResult(scenario, s, 'pre')).toEqual({ confidence: 2, score: 2, max: 4 });
+    expect(s.mistakes).toEqual([]);
+  });
+
+  it('lets the player change an answer until they move on', () => {
+    const changed = play([...preCheck, answer('seal_vs_fit', 'false'), rate('confidence', 5)]);
+    expect(quizResult(scenario, changed, 'pre')).toEqual({ confidence: 5, score: 3, max: 4 });
+  });
+
+  it('ignores a rating outside 1 to 5 and an answer that is not one of the options', () => {
+    const s = play([rate('confidence', 3)]);
+    expect(step(scenario, s, rate('confidence', 6))).toBe(s);
+    expect(step(scenario, s, rate('confidence', 2.5))).toBe(s);
+    expect(step(scenario, s, answer('valve', 'maybe'))).toBe(s);
+    expect(step(scenario, s, rate('comfort', 3))).toBe(s);
+  });
+
+  it('the post-check also needs comfort and willingness to wear an N95 for a full shift', () => {
+    const noComfort = play([...toPost, ...postCheck.slice(0, -2)]);
+    expect(currentScreen(scenario, noComfort)?.id).toBe('post');
+    expect(canAdvance(scenario, noComfort)).toBe(false);
+    const done = play(postCheck.slice(-2), noComfort);
+    expect(canAdvance(scenario, done)).toBe(true);
+    expect(quizResult(scenario, done, 'post')).toEqual({ confidence: 4, score: 4, max: 4, comfort: 3, willingToWear: 5 });
+    expect(quizResult(scenario, done, 'pre')).toEqual({ confidence: 2, score: 2, max: 4 });
+  });
+
+  it('keeps a role and a cleaned-up trainer code, and lets both be cleared', () => {
+    const s = play([{ type: 'setContext', role: 'asha', trainerCode: ' kzd-ert-1125 (morning batch, Meera) ' }]);
+    expect(s.context).toEqual({ role: 'asha', trainerCode: 'KZD-ERT-1125MORN' });
+    expect(play([{ type: 'setContext', role: null, trainerCode: '' }], s).context).toEqual({});
+    expect(play([{ type: 'setContext', role: 'boss' as never }], s).context).toEqual({ trainerCode: 'KZD-ERT-1125MORN' });
+  });
+
+  it('counts the eight drill steps without the two checks', () => {
+    expect(drillStep(scenario, startSession(scenario))).toBeNull();
+    expect(drillStep(scenario, play(toAlert))).toEqual({ n: 1, total: 8 });
+    expect(drillStep(scenario, play(toWaste))).toEqual({ n: 8, total: 8 });
+    expect(drillStep(scenario, play(toPost))).toBeNull();
+  });
+});
+
+describe('session: dispose and log', () => {
+  it('needs every item binned and the stock log answered before moving on', () => {
+    const s = play([...toWaste, ...binsAllRight]);
+    expect(canAdvance(scenario, s)).toBe(false);
+    const logged = step(scenario, s, { type: 'answerLog', value: 36 });
+    expect(canAdvance(scenario, logged)).toBe(true);
+    expect(logged.mistakes).toEqual([]);
+  });
+
+  it('records an item put in the wrong bin, once, and keeps the first decision', () => {
+    const s = play([...toWaste, bin('gloves', 'general'), bin('gloves', 'red')]);
+    expect(s.mistakes).toEqual([{ code: 'waste_gloves', screenId: 'waste', note: { en: 'Used gloves into General waste', hi: 'इस्तेमाल किए दस्ताने → सामान्य कचरा' } }]);
+    const p = s.progress.waste;
+    expect(p?.kind === 'bins' && p.placed).toEqual({ gloves: 'general' });
+  });
+
+  it('records a wrong stock-log answer with the number written', () => {
+    const s = play([...toWaste, { type: 'answerLog', value: 21 }, { type: 'answerLog', value: 36 }]);
+    expect(s.mistakes).toEqual([{ code: 'stock_log', screenId: 'waste', note: { en: 'Stock log wrote 21', hi: 'स्टॉक लॉग में 21 लिखा' } }]);
+    expect(step(scenario, play(toWaste), { type: 'answerLog', value: 99 }).mistakes).toEqual([]);
+  });
+});
+
+describe('session: finishing', () => {
+  it('times the run from start to the end of the post-check', () => {
+    const start = startSession(scenario, Math.random, () => 1_000);
+    const before = play(toResults.slice(0, -1), start);
+    expect(before.finishedAt).toBeNull();
+    const done = step(scenario, before, next, Math.random, () => 61_000);
+    expect([done.finished, done.startedAt, done.finishedAt]).toEqual([true, 1_000, 61_000]);
+  });
+
+  it('results are marked saved once per run, and only after the run is finished', () => {
+    const midway = play(toDoff);
+    expect(step(scenario, midway, { type: 'resultSaved' })).toBe(midway);
+    const done = play(toResults);
+    expect(done.resultSaved).toBe(false);
+    const saved = step(scenario, done, { type: 'resultSaved' });
+    expect(saved.resultSaved).toBe(true);
+    expect(step(scenario, saved, { type: 'resultSaved' })).toBe(saved);
+    expect(step(scenario, saved, { type: 'restart' }).resultSaved).toBe(false);
+  });
+
+  it('groups out-of-order mistakes under one heading and counts them; other mistakes stay separate', () => {
+    const s = play([...toDoff, tap('s3'), tap('s2'), tap('s0'), tap('s4'), tap('t0'), ...doffInOrder.slice(1), next, bin('gloves', 'general'), bin('n95', 'red')]);
+    expect(groupMistakes(scenario, s.mistakes).map((g) => [g.label.en, g.count])).toEqual([
+      ['Took off PPE out of order', 3],
+      ['Pull the N95 off by the front', 1],
+      ['Used gloves into General waste', 1],
+      ['Used N95 into Red bag', 1],
+    ]);
+    expect(groupMistakes(scenario, s.mistakes)[0]?.label.hi).toBe('PPE गलत क्रम में उतारा');
   });
 });
