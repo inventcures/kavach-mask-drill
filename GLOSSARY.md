@@ -1,0 +1,13 @@
+# Glossary
+
+- **Member**: one of the four people on the player's team (`you` plus three teammates).
+- **Leakage** (inward leakage): fraction of outside air reaching a member's lungs, 0 to 1. Filter penetration plus seal leakage plus stock penalty, capped at 1.
+- **Protection factor (PF)**: 1 / leakage.
+- **Team leakage**: arithmetic mean of members' leakage (null members ignored). **Team PF** = 1 / team leakage (the harmonic mean of PFs). **Team protection %** = (1 - team leakage) x 100.
+- **Contamination event**: a doffing error (trap or out-of-order after the first step) that would put virus on skin or face. Counted separately from leakage.
+- **Seal check**: the user check done every time a mask goes on. Not a **fit test** (yearly, instrumented).
+- **Scenario**: a JSON file of screens for one drill, e.g. `nipah-kerala-01`.
+- **Screen kinds**: briefing, choice, stock, sequence, seal, buddy, bins, quiz, results.
+- **Track**: ERT (disposable N95), Elastomeric, Storekeeper, ASHA.
+- **Mistake**: `{code, screenId, note}` recorded when the player chooses wrongly; notes are translatable Text.
+- **Text**: an object of strings keyed by language code, always with `en`.

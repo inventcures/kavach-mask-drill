@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5257">
+<meta name="description" content="Mask Drill: a phone-first training game for emergency response teams on choosing, fitting, checking and safely removing masks during an outbreak.">
+<title>Mask Drill</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1d2321; --muted:#5d6763; --line:#dcd8cf;
+  --brand:#0f5257; --brand-ink:#ffffff; --good:#1f7a3f; --good-bg:#e3f2e7;
+  --bad:#b3261e; --bad-bg:#fbe7e5; --warn:#8a5a00; --warn-bg:#fff2d6; --accent:#e0a526;
+  --chip:#eef0ec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121615; --card:#1b2120; --ink:#e8ece9; --muted:#9aa5a0; --line:#2e3634;
+    --brand:#3fa3a8; --brand-ink:#071413; --good:#6fd08f; --good-bg:#16301f;
+    --bad:#ff8a80; --bad-bg:#3a1a18; --warn:#ffcf6b; --warn-bg:#3a2d10; --chip:#242b29;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121615; --card:#1b2120; --ink:#e8ece9; --muted:#9aa5a0; --line:#2e3634;
+  --brand:#3fa3a8; --brand-ink:#071413; --good:#6fd08f; --good-bg:#16301f;
+  --bad:#ff8a80; --bad-bg:#3a1a18; --warn:#ffcf6b; --warn-bg:#3a2d10; --chip:#242b29;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:5;background:var(--brand);color:var(--brand-ink);padding:10px 16px;display:flex;align-items:center;gap:10px}
+header h1{font-size:17px;margin:0;flex:1;letter-spacing:.2px}
+header button{background:transparent;border:1px solid currentColor;color:inherit;border-radius:8px;padding:4px 10px;font:inherit;font-size:14px;min-height:32px}
+#meter{background:var(--card);border-bottom:1px solid var(--line);padding:8px 16px;display:none}
+#meter .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.bar{height:10px;background:var(--chip);border-radius:6px;overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:var(--good);transition:width .4s}
+main{max-width:560px;margin:0 auto;padding:16px 16px 96px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+h2{font-size:20px;margin:0 0 8px}
+h3{font-size:16px;margin:12px 0 6px}
+p{margin:0 0 10px}
+.muted{color:var(--muted);font-size:14px}
+.step{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px}
+.btn{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;font:inherit;min-height:48px;cursor:pointer}
+.btn:active{transform:scale(.99)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);text-align:center;font-weight:600}
+.btn.sel{border-color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.btn.ok{background:var(--good-bg);border-color:var(--good)}
+.btn.no{background:var(--bad-bg);border-color:var(--bad)}
+.btn[disabled]{opacity:.55;cursor:default}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2 .btn{margin:0;text-align:center}
+.fb{border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px}
+.fb.good{background:var(--good-bg);color:var(--ink);border-left:4px solid var(--good)}
+.fb.bad{background:var(--bad-bg);color:var(--ink);border-left:4px solid var(--bad)}
+.fb.warn{background:var(--warn-bg);color:var(--ink);border-left:4px solid var(--accent)}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:2px 10px;font-size:13px;margin:2px 4px 2px 0}
+.item{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.item .t{font-weight:600}
+.item .d{font-size:14px;color:var(--muted);margin:4px 0 8px}
+.seq{display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;border:1.5px dashed var(--line);border-radius:10px;margin-bottom:10px}
+.seq .chip{background:var(--brand);color:var(--brand-ink)}
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.mem{text-align:center;font-size:12px}
+.mem .dot{width:38px;height:38px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+svg.face{display:block;margin:6px auto 10px;max-width:220px;width:70%}
+.leak{animation:puff 1.2s ease-in-out infinite}
+@keyframes puff{0%{opacity:.35;transform:translateY(0)}50%{opacity:1}100%{opacity:.3;transform:translateY(-6px)}}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+.big{font-size:34px;font-weight:700;margin:4px 0}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.foot .btn{max-width:560px;margin:0 auto}
+.likert{display:flex;gap:6px}
+.likert .btn{text-align:center;padding:10px 0;margin:0}
+a{color:var(--brand)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Mask Drill</h1>
+  <button id="langBtn" aria-label="Switch language">हिन्दी</button>
+</header>
+<div id="meter" aria-live="polite">
+  <div class="row"><span id="meterLabel">Team protection</span><span id="meterVal">–</span></div>
+  <div class="bar"><i id="meterBar" style="width:0%"></i></div>
+</div>
+<main id="app"></main>
+<div class="foot" id="foot" style="display:none"><button class="btn primary" id="nextBtn">Next</button></div>
+
+<script>
+"use strict";
+/* ============ Language ============ */
+let LANG = 'en';
+try { LANG = localStorage.getItem('md_lang') || 'en'; } catch(e){}
+const T = x => (x && typeof x === 'object') ? (x[LANG] || x.en) : x;
+const UI = {
+  title:{en:'Mask Drill',hi:'मास्क ड्रिल'},
+  next:{en:'Next',hi:'आगे'},
+  start:{en:'Start the drill',hi:'ड्रिल शुरू करें'},
+  check:{en:'Check',hi:'जाँचें'},
+  team:{en:'Team protection',hi:'टीम सुरक्षा'},
+  undo:{en:'Clear and retry',hi:'मिटाएँ, फिर से करें'},
+  use:{en:'Use',hi:'इस्तेमाल करें'},
+  reject:{en:'Reject',hi:'हटाएँ'},
+  you:{en:'You',hi:'आप'},
+  restart:{en:'Play again',hi:'फिर से खेलें'},
+  export:{en:'Download my results (JSON)',hi:'मेरे नतीजे डाउनलोड करें (JSON)'},
+  finish:{en:'See results',hi:'नतीजे देखें'}
+};
+
+/* ============ State ============ */
+const GAME_DATE = new Date('2026-11-18');
+const S = {
+  i:0, mistakes:[], pre:{}, post:{}, t0:Date.now(),
+  // inward leakage fraction per team member (0..1). Lower is better.
+  leak:{you:null, ravi:null, anjali:null, faiz:null},
+  mask:{transfer:null}, contam:0, stockOk:true
+};
+function miss(code, note){ S.mistakes.push({code, note, at: SCREENS[S.i].id}); }
+const GROUP = {
+  don_order:{en:'Put on PPE out of order',hi:'PPE गलत क्रम में पहना'},
+  doff_order:{en:'Took off PPE out of order',hi:'PPE गलत क्रम में उतारा'}
+};
+
+/* Protection model (teaching approximation, not a lab value):
+   inward leakage = filter penetration + face-seal leakage.
+   Team exposure = average of each member's leakage, so ONE bad seal dominates. */
+const FILTER = {n95:0.03, surgical:0.35, cloth:0.6, none:1};
+function teamLeak(){
+  const v = Object.values(S.leak).filter(x => x !== null);
+  if(!v.length) return null;
+  return v.reduce((a,b)=>a+b,0)/v.length;
+}
+function updMeter(){
+  const m = document.getElementById('meter');
+  const L = teamLeak();
+  if(L===null){ m.style.display='none'; return; }
+  m.style.display='block';
+  const pct = Math.max(0, Math.round((1-L)*100));
+  document.getElementById('meterLabel').textContent = T(UI.team);
+  document.getElementById('meterVal').textContent = pct + '%  ·  PF ' + (1/L).toFixed(1);
+  const b = document.getElementById('meterBar');
+  b.style.width = pct + '%';
+  b.style.background = pct>=90 ? 'var(--good)' : pct>=70 ? 'var(--accent)' : 'var(--bad)';
+}
+
+/* ============ Helpers ============ */
+const $app = document.getElementById('app');
+const $foot = document.getElementById('foot');
+const $next = document.getElementById('nextBtn');
+function h(tag, attrs, ...kids){
+  const e = document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k==='on') for(const ev in attrs.on) e.addEventListener(ev, attrs.on[ev]);
+    else if(k==='html') e.innerHTML = attrs.html;
+    else e.setAttribute(k, attrs[k]);
+  }
+  for(const c of kids.flat()){ if(c==null) continue; e.append(c.nodeType ? c : document.createTextNode(c)); }
+  return e;
+}
+function card(...kids){ return h('div',{class:'card'},...kids); }
+function fb(kind, text){ return h('div',{class:'fb '+kind}, T(text)); }
+function showNext(label, fn){
+  $foot.style.display='block';
+  $next.textContent = T(label || UI.next);
+  $next.onclick = fn || go;
+}
+function hideNext(){ $foot.style.display='none'; }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function go(){ S.i++; render(); window.scrollTo(0,0); }
+function stepLabel(n){ return h('div',{class:'step'}, (LANG==='hi'?'चरण ':'Step ') + n + ' / 8'); }
+
+/* ============ Quiz (pre and post) ============ */
+const QUIZ = [
+  {q:{en:'A user seal check is the same as a fit test.',hi:'यूज़र सील चेक और फिट टेस्ट एक ही चीज़ हैं।'},
+   opts:[{en:'True',hi:'सही'},{en:'False',hi:'गलत'}], a:1},
+  {q:{en:'When you take off an N95, you should hold:',hi:'N95 उतारते समय आपको क्या पकड़ना चाहिए:'},
+   opts:[{en:'The front of the mask',hi:'मास्क का सामने वाला हिस्सा'},{en:'The straps, bottom one first',hi:'पट्टियाँ, पहले नीचे वाली'},{en:'Either is fine',hi:'कुछ भी ठीक है'}], a:1},
+  {q:{en:'Four teammates: three have a perfect seal, one has a big gap. Team exposure is mostly decided by:',hi:'चार साथी: तीन का सील बिल्कुल ठीक है, एक के मास्क में बड़ा गैप है। टीम का एक्सपोज़र ज़्यादातर किससे तय होता है:'},
+   opts:[{en:'The three good seals',hi:'तीन अच्छे सील से'},{en:'The one bad seal',hi:'एक खराब सील से'},{en:'The mask brand',hi:'मास्क के ब्रांड से'}], a:1},
+  {q:{en:'An N95 with an exhalation valve is a good choice when caring for an infectious patient.',hi:'संक्रामक मरीज़ की देखभाल में वाल्व वाला N95 अच्छा विकल्प है।'},
+   opts:[{en:'True',hi:'सही'},{en:'False',hi:'गलत'}], a:1}
+];
+const CONF = {en:'How confident are you that you can put on, check and remove an N95 correctly?',hi:'आपको कितना भरोसा है कि आप N95 सही तरीके से पहन, जाँच और उतार सकते हैं?'};
+function quizScreen(which){
+  const store = S[which];
+  const box = card(
+    h('h2',null, which==='pre' ? T({en:'Before we start',hi:'शुरू करने से पहले'}) : T({en:'Quick check after the drill',hi:'ड्रिल के बाद एक छोटी जाँच'})),
+    h('p',{class:'muted'}, T({en:'No names are collected. Your answers stay on this phone unless you choose to download them.',hi:'कोई नाम नहीं लिया जाता। आपके जवाब इसी फ़ोन पर रहते हैं, जब तक आप उन्हें डाउनलोड न करें।'}))
+  );
+  const cq = h('div',null, h('h3',null,T(CONF)));
+  const lk = h('div',{class:'likert'});
+  for(let v=1; v<=5; v++){
+    const b = h('button',{class:'btn'}, String(v));
+    b.onclick = ()=>{ store.conf=v; [...lk.children].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); maybe(); };
+    lk.append(b);
+  }
+  cq.append(lk, h('div',{class:'muted',style:'display:flex;justify-content:space-between;margin-top:4px'}, h('span',null,T({en:'1 not at all',hi:'1 बिल्कुल नहीं'})), h('span',null,T({en:'5 very',hi:'5 बहुत'}))));
+  box.append(cq);
+  store.ans = store.ans || [];
+  QUIZ.forEach((qq,qi)=>{
+    const wrap = h('div',null,h('h3',null,(qi+1)+'. '+T(qq.q)));
+    qq.opts.forEach((o,oi)=>{
+      const b = h('button',{class:'btn'},T(o));
+      b.onclick = ()=>{ store.ans[qi]=oi; [...wrap.querySelectorAll('.btn')].forEach(c=>c.classList.remove('sel')); b.classList.add('sel'); maybe(); };
+      wrap.append(b);
+    });
+    box.append(wrap);
+  });
+  function maybe(){
+    const done = store.conf && QUIZ.every((_,i)=>store.ans[i]!==undefined);
+    if(done){
+      store.score = QUIZ.reduce((s,q,i)=>s+(store.ans[i]===q.a?1:0),0);
+      showNext(which==='post'?UI.finish:UI.next);
+    }
+  }
+  hideNext();
+  return [box];
+}
+
+/* ============ Screens ============ */
+const SCREENS = [
+/* 0. Home */
+{id:'home', render(){
+  S.mistakes=[]; S.leak={you:null,ravi:null,anjali:null,faiz:null}; S.contam=0; S.pre={}; S.post={}; S.t0=Date.now(); S.saved=false; S.stockOk=true; S.mask={transfer:null};
+  updMeter();
+  showNext(UI.start);
+  return [card(
+    h('h2',null,T({en:'Mask Drill',hi:'मास्क ड्रिल'})),
+    h('p',null,T({en:'A 10-minute drill for emergency response teams. You lead a team of four during a suspected Nipah case. Pick the right mask, reject bad stock, get a good seal, check your teammates, and take everything off without contaminating yourself.',hi:'आपातकालीन प्रतिक्रिया टीमों के लिए 10 मिनट की ड्रिल। संदिग्ध निपाह केस के दौरान आप चार लोगों की टीम का नेतृत्व करते हैं। सही मास्क चुनें, खराब स्टॉक हटाएँ, अच्छा सील बनाएँ, अपने साथियों की जाँच करें, और खुद को संक्रमित किए बिना सब कुछ उतारें।'})),
+    h('p',null,T({en:'Your score is the team\'s average protection. One teammate with a leaking mask pulls the whole team down, so checking each other matters as much as your own fit.',hi:'आपका स्कोर पूरी टीम की औसत सुरक्षा है। एक साथी का मास्क लीक हो तो पूरी टीम का स्कोर गिरता है, इसलिए एक-दूसरे की जाँच करना उतना ही ज़रूरी है जितना अपना फिट।'})),
+    h('p',{class:'muted'},T({en:'Training aid only. Always follow your hospital or state infection-control protocol. Works offline after the first visit.',hi:'यह केवल प्रशिक्षण के लिए है। हमेशा अपने अस्पताल या राज्य के संक्रमण नियंत्रण प्रोटोकॉल का पालन करें। पहली बार खुलने के बाद यह ऑफ़लाइन भी चलता है।'}))
+  )];
+}},
+/* 1. Pre-quiz */
+{id:'pre', render(){ return quizScreen('pre'); }},
+/* 2. Alert */
+{id:'alert', render(){
+  showNext();
+  return [card(
+    stepLabel(1),
+    h('h2',null,'⚠ '+T({en:'Alert: suspected Nipah case',hi:'अलर्ट: संदिग्ध निपाह केस'})),
+    h('p',null,T({en:'08:10. A district hospital calls your ERT. A 34-year-old man has fever, confusion and a cough. His neighbour died last week with similar symptoms. He needs triage at the entrance, a transfer by ambulance to the isolation ward, and suctioning of his airway on arrival.',hi:'सुबह 08:10। एक ज़िला अस्पताल आपकी ERT को बुलाता है। 34 साल के एक व्यक्ति को बुखार, भ्रम और खाँसी है। पिछले हफ़्ते उसके पड़ोसी की इन्हीं लक्षणों के साथ मौत हुई थी। उसे प्रवेश द्वार पर ट्राइएज, एम्बुलेंस से आइसोलेशन वार्ड तक ले जाना, और पहुँचने पर उसके वायुमार्ग की सक्शनिंग की ज़रूरत है।'})),
+    h('p',null,T({en:'Nipah spreads mainly through close contact with body fluids and respiratory droplets. Aerosol-generating procedures such as suctioning raise the risk further.',hi:'निपाह मुख्य रूप से शरीर के तरल पदार्थों और साँस की बूँदों के नज़दीकी संपर्क से फैलता है। सक्शनिंग जैसी एरोसोल बनाने वाली प्रक्रियाएँ खतरा और बढ़ाती हैं।'})),
+    h('h3',null,T({en:'Your team',hi:'आपकी टीम'})),
+    teamRow()
+  )];
+}},
+/* 3. Choose mask per task */
+{id:'choose', render(){
+  hideNext();
+  const tasks = [
+    {k:'triage', name:{en:'Triage desk at the entrance, 2 m from patients, behind a screen',hi:'प्रवेश पर ट्राइएज डेस्क, मरीज़ों से 2 मीटर दूर, स्क्रीन के पीछे'},
+     ok:['surgical','n95','n95eye'], best:'surgical',
+     why:{en:'At a distance with a barrier, a surgical mask is reasonable and saves N95s for close contact. An N95 also works, but stock is limited.',hi:'दूरी और बैरियर के साथ सर्जिकल मास्क ठीक है, और N95 नज़दीकी संपर्क के लिए बचते हैं। N95 भी चलेगा, पर स्टॉक सीमित है।'}},
+    {k:'transfer', name:{en:'Ambulance transfer: you sit next to the coughing patient for 25 minutes',hi:'एम्बुलेंस ट्रांसफ़र: आप 25 मिनट तक खाँसते मरीज़ के बगल में बैठते हैं'},
+     ok:['n95eye'], best:'n95eye',
+     why:{en:'Close contact with a coughing suspected Nipah patient in a small space: N95 plus eye protection (goggles or face shield), with gown and gloves.',hi:'छोटी जगह में खाँसते संदिग्ध निपाह मरीज़ से नज़दीकी संपर्क: N95 और आँखों की सुरक्षा (गॉगल्स या फ़ेस शील्ड), साथ में गाउन और दस्ताने।'}},
+    {k:'agp', name:{en:'Airway suctioning in the isolation room',hi:'आइसोलेशन रूम में वायुमार्ग की सक्शनिंग'},
+     ok:['n95eye'], best:'n95eye',
+     why:{en:'Suctioning generates aerosols. N95 plus face shield or goggles, gown, gloves, in an isolation room. Never a surgical or cloth mask.',hi:'सक्शनिंग से एरोसोल बनते हैं। N95 के साथ फ़ेस शील्ड या गॉगल्स, गाउन, दस्ताने, और आइसोलेशन रूम। सर्जिकल या कपड़े का मास्क कभी नहीं।'}}
+  ];
+  const opts = [
+    {k:'cloth', n:{en:'Cloth mask',hi:'कपड़े का मास्क'}},
+    {k:'surgical', n:{en:'Surgical mask',hi:'सर्जिकल मास्क'}},
+    {k:'n95', n:{en:'N95 only',hi:'केवल N95'}},
+    {k:'n95eye', n:{en:'N95 + goggles or face shield',hi:'N95 + गॉगल्स या फ़ेस शील्ड'}}
+  ];
+  const c = card(stepLabel(2), h('h2',null,T({en:'Pick the right protection for each task',hi:'हर काम के लिए सही सुरक्षा चुनें'})));
+  let done = 0;
+  tasks.forEach(t=>{
+    const w = h('div',{class:'item'}, h('div',{class:'t'},T(t.name)));
+    const fbBox = h('div');
+    opts.forEach(o=>{
+      const b = h('button',{class:'btn'},T(o.n));
+      b.onclick = ()=>{
+        [...w.querySelectorAll('.btn')].forEach(x=>x.disabled=true);
+        const good = t.ok.includes(o.k);
+        b.classList.add(good?'ok':'no');
+        if(!good){
+          miss('wrong_mask_'+t.k, {en:'Chose '+o.n.en+' for: '+t.name.en, hi:t.name.hi+' के लिए '+o.n.hi+' चुना'});
+          [...w.querySelectorAll('.btn')][opts.findIndex(x=>x.k===t.best)].classList.add('ok');
+        }
+        if(t.k==='transfer') S.mask.transfer = o.k;
+        fbBox.append(fb(good?'good':'bad', t.why));
+        if(++done===tasks.length) showNext();
+      };
+      w.append(b);
+    });
+    w.append(fbBox);
+    c.append(w);
+  });
+  return [c];
+}},
+/* 4. Stockpile */
+{id:'stock', render(){
+  hideNext();
+  const items = [
+    {id:'A', t:{en:'N95, box 1',hi:'N95, डिब्बा 1'}, d:{en:'Sealed pack. Expiry 06/2028. Straps elastic.',hi:'सील पैक। एक्सपायरी 06/2028। पट्टियाँ लचीली।'}, good:true,
+     why:{en:'Good to use.',hi:'इस्तेमाल के लिए ठीक।'}},
+    {id:'B', t:{en:'N95, box 2',hi:'N95, डिब्बा 2'}, d:{en:'Sealed pack. Expiry 03/2025. Straps feel loose and crack when stretched.',hi:'सील पैक। एक्सपायरी 03/2025। पट्टियाँ ढीली हैं और खींचने पर चटकती हैं।'}, good:false,
+     why:{en:'Expired, and the straps have perished. Old elastic cannot hold a seal. Set it aside and report it in the stock log.',hi:'एक्सपायर हो चुका, और पट्टियाँ खराब हो गई हैं। पुराना इलास्टिक सील नहीं पकड़ सकता। अलग रखें और स्टॉक लॉग में दर्ज करें।'}},
+    {id:'C', t:{en:'N95 with exhalation valve',hi:'वाल्व वाला N95'}, d:{en:'In date. Has a round plastic valve on the front.',hi:'एक्सपायरी ठीक। सामने गोल प्लास्टिक वाल्व है।'}, good:false,
+     why:{en:'The valve protects you, but lets your unfiltered breath out. In patient care and sterile areas, use valveless N95s so you do not spread infection if you are infected yourself.',hi:'वाल्व आपको बचाता है, पर आपकी बिना फ़िल्टर की साँस बाहर जाती है। मरीज़ की देखभाल में बिना वाल्व वाला N95 इस्तेमाल करें, ताकि अगर आप खुद संक्रमित हों तो संक्रमण न फैले।'}},
+    {id:'D', t:{en:'N95, loose in a cardboard box',hi:'N95, गत्ते के डिब्बे में खुले'}, d:{en:'No packaging. Box was stored under a leaking AC unit; masks are damp and creased.',hi:'पैकिंग नहीं। डिब्बा टपकते AC के नीचे रखा था; मास्क गीले और मुड़े हुए हैं।'}, good:false,
+     why:{en:'Wet or crushed filters lose performance and may be contaminated. Reject. Store masks dry, sealed, off the floor.',hi:'गीले या दबे हुए फ़िल्टर ठीक काम नहीं करते और दूषित हो सकते हैं। हटाएँ। मास्क सूखे, सील पैक में, ज़मीन से ऊपर रखें।'}},
+    {id:'E', t:{en:'N95, box 3 (different model)',hi:'N95, डिब्बा 3 (दूसरा मॉडल)'}, d:{en:'Sealed. Expiry 11/2027. NIOSH/BIS marking printed on the mask.',hi:'सील पैक। एक्सपायरी 11/2027। मास्क पर NIOSH/BIS मार्किंग छपी है।'}, good:true,
+     why:{en:'Good to use. Having two models helps: faces that do not fit one often fit the other.',hi:'इस्तेमाल के लिए ठीक। दो मॉडल होना अच्छा है: जिनके चेहरे पर एक फिट नहीं होता, उन पर दूसरा अक्सर हो जाता है।'}},
+    {id:'F', t:{en:'"N95" with no markings',hi:'बिना मार्किंग वाला "N95"'}, d:{en:'Bought locally during a shortage. No standard or manufacturer printed on it. Ear loops, not head straps.',hi:'कमी के समय लोकल खरीदा गया। उस पर कोई मानक या निर्माता नहीं छपा। सिर की पट्टी नहीं, कान के लूप।'}, good:false,
+     why:{en:'Unmarked masks are often counterfeit. Ear loops rarely seal well. Reject and flag the supplier.',hi:'बिना मार्किंग वाले मास्क अक्सर नकली होते हैं। कान के लूप से सील कम ही बनता है। हटाएँ और सप्लायर की शिकायत करें।'}}
+  ];
+  const c = card(stepLabel(3), h('h2',null,T({en:'Check the stockpile',hi:'स्टॉक की जाँच करें'})),
+    h('p',{class:'muted'},T({en:'Today is 18 Nov 2026. Decide which masks the team can use.',hi:'आज 18 नवंबर 2026 है। तय करें कि टीम कौन से मास्क इस्तेमाल कर सकती है।'})));
+  let done=0, usedBad=0;
+  items.forEach(it=>{
+    const w = h('div',{class:'item'}, h('div',{class:'t'},T(it.t)), h('div',{class:'d'},T(it.d)));
+    const r = h('div',{class:'row2'});
+    const fbBox = h('div');
+    [['use',true],['reject',false]].forEach(([lab,val])=>{
+      const b = h('button',{class:'btn'},T(UI[lab]));
+      b.onclick = ()=>{
+        [...r.children].forEach(x=>x.disabled=true);
+        const right = (val===it.good);
+        b.classList.add(right?'ok':'no');
+        if(!right){
+          miss('stock_'+it.id, {en:(val?'Used ':'Rejected ')+it.t.en, hi:it.t.hi+(val?' इस्तेमाल किया':' हटाया')});
+          if(val) usedBad++;
+        }
+        fbBox.append(fb(right?'good':'bad', it.why));
+        if(++done===items.length){ S.stockOk = usedBad===0; showNext(); }
+      };
+      r.append(b);
+    });
+    w.append(r, fbBox);
+    c.append(w);
+  });
+  return [c];
+}},
+/* 5. Donning order */
+{id:'don', render(){ return orderScreen({
+  n:4,
+  title:{en:'Put on your PPE in the right order',hi:'PPE सही क्रम में पहनें'},
+  hint:{en:'Tap the steps in order.',hi:'चरणों को क्रम से टैप करें।'},
+  steps:[
+    {en:'Hand hygiene',hi:'हाथों की सफ़ाई'},
+    {en:'Gown',hi:'गाउन'},
+    {en:'N95',hi:'N95'},
+    {en:'Seal check',hi:'सील चेक'},
+    {en:'Goggles or face shield',hi:'गॉगल्स या फ़ेस शील्ड'},
+    {en:'Gloves (over gown cuffs)',hi:'दस्ताने (गाउन की कफ़ के ऊपर)'}
+  ],
+  why:{en:'Clean hands first, gown, then mask and seal check before anything covers your face, then eye protection, and gloves last so they cover the gown cuffs.',hi:'पहले साफ़ हाथ, फिर गाउन, फिर मास्क और चेहरे पर कुछ और लगाने से पहले सील चेक, फिर आँखों की सुरक्षा, और आखिर में दस्ताने ताकि वे गाउन की कफ़ को ढकें।'},
+  code:'don_order'
+}); }},
+/* 6. Seal check */
+{id:'seal', render(){
+  hideNext();
+  const leaks = {nose:true, side:true, chin:true};
+  let tries = 0, harm = 0;
+  const c = card(stepLabel(5), h('h2',null,T({en:'Get a good seal',hi:'अच्छा सील बनाएँ'})),
+    h('p',{class:'muted'},T({en:'You put on the N95. Cover it with both hands and breathe out sharply. Where do you feel air escaping? Fix each leak.',hi:'आपने N95 पहन लिया। दोनों हाथों से ढकें और ज़ोर से साँस छोड़ें। हवा कहाँ से निकल रही है? हर लीक ठीक करें।'})));
+  const fig = h('div');
+  const status = h('div');
+  const acts = [
+    {k:'pinch', n:{en:'Pinch the nose clip with one hand',hi:'एक हाथ से नाक की क्लिप दबाएँ'}, fix:null, bad:true,
+     msg:{en:'Pinching with one hand bends the clip into a V and leaves gaps on both sides of the nose.',hi:'एक हाथ से दबाने पर क्लिप V आकार में मुड़ जाती है और नाक के दोनों तरफ़ गैप रह जाता है।'}},
+    {k:'mould', n:{en:'Mould the nose clip with fingertips of both hands, from the middle outwards',hi:'दोनों हाथों की उँगलियों से नाक की क्लिप को बीच से बाहर की ओर दबाकर आकार दें'}, fix:'nose',
+     msg:{en:'Good. The clip now follows the shape of your nose.',hi:'बढ़िया। क्लिप अब आपकी नाक के आकार में है।'}},
+    {k:'straps', n:{en:'Top strap high on the crown, bottom strap at the back of the neck below the ears',hi:'ऊपर की पट्टी सिर के ऊपरी हिस्से पर, नीचे की पट्टी कानों के नीचे गर्दन के पीछे'}, fix:'side',
+     msg:{en:'Good. Correct strap position pulls the sides flat against your cheeks.',hi:'बढ़िया। पट्टियों की सही जगह से किनारे गालों से चिपक जाते हैं।'}},
+    {k:'cross', n:{en:'Cross the straps to make them tighter',hi:'पट्टियों को कसने के लिए क्रॉस करें'}, fix:null, bad:true,
+     msg:{en:'Crossing straps distorts the mask and opens gaps at the sides.',hi:'पट्टियाँ क्रॉस करने से मास्क टेढ़ा होता है और किनारों पर गैप बनते हैं।'}},
+    {k:'chin', n:{en:'Pull the bottom of the mask down under your chin',hi:'मास्क का निचला हिस्सा ठोड़ी के नीचे तक खींचें'}, fix:'chin',
+     msg:{en:'Good. The mask now cups your chin.',hi:'बढ़िया। मास्क अब ठोड़ी को ढक रहा है।'}},
+    {k:'tape', n:{en:'Stuff tissue into the gaps',hi:'गैप में टिश्यू भर दें'}, fix:null, bad:true,
+     msg:{en:'Never put anything between the mask and your face. It creates a channel for air to leak in.',hi:'मास्क और चेहरे के बीच कभी कुछ न रखें। इससे हवा अंदर आने का रास्ता बनता है।'}}
+  ];
+  const actBox = h('div');
+  function draw(){
+    fig.innerHTML = faceSVG(leaks);
+    const n = Object.values(leaks).filter(Boolean).length;
+    status.innerHTML='';
+    if(n===0){
+      status.append(fb('good',{en:'No air escapes when you breathe out, and the mask pulls in slightly when you breathe in. Seal check passed.',hi:'साँस छोड़ने पर हवा बाहर नहीं निकलती, और साँस लेने पर मास्क थोड़ा अंदर खिंचता है। सील चेक पास।'}));
+      status.append(fb('warn',{en:'Remember: a seal check is done every time you put a mask on. It does not replace a yearly fit test, which checks that this model suits your face.',hi:'याद रखें: सील चेक हर बार मास्क पहनने पर किया जाता है। यह सालाना फिट टेस्ट की जगह नहीं लेता, जो जाँचता है कि यह मॉडल आपके चेहरे पर फिट है।'}));
+      [...actBox.querySelectorAll('.btn')].forEach(b=>b.disabled=true);
+      const base = S.mask.transfer==='n95eye'||S.mask.transfer==='n95' ? FILTER.n95 : (FILTER[S.mask.transfer]||FILTER.n95);
+      S.leak.you = Math.min(1, base + 0.03*harm + (S.stockOk?0:0.15));
+      if(!S.stockOk) status.append(fb('bad',{en:'But a mask from the bad stock reached your team. A perished strap or damp filter adds leakage even with good technique.',hi:'लेकिन खराब स्टॉक का एक मास्क आपकी टीम तक पहुँच गया। खराब पट्टी या गीला फ़िल्टर अच्छी तकनीक के बावजूद लीकेज बढ़ाता है।'}));
+      updMeter();
+      showNext();
+    } else {
+      status.append(h('p',{class:'muted'}, T({en:'Leaks remaining: ',hi:'बचे हुए लीक: '}) + n));
+    }
+  }
+  acts.forEach(a=>{
+    const b = h('button',{class:'btn'},T(a.n));
+    b.onclick = ()=>{
+      tries++;
+      const box = h('div');
+      if(a.bad){
+        harm++; b.classList.add('no'); b.disabled=true;
+        miss('seal_'+a.k, a.n);
+        if(a.k==='pinch') leaks.nose=true;
+        if(a.k==='cross') leaks.side=true;
+        box.append(fb('bad',a.msg));
+      } else {
+        leaks[a.fix]=false; b.classList.add('ok');
+        box.append(fb('good',a.msg));
+      }
+      actBox.querySelectorAll('.fb').forEach(f=>f.remove());
+      b.after(box.firstChild);
+      draw();
+    };
+    actBox.append(b);
+  });
+  c.append(fig, status, actBox);
+  draw();
+  return [c];
+}},
+/* 7. Buddy check */
+{id:'buddy', render(){
+  hideNext();
+  const mates = [
+    {k:'ravi', name:'Ravi', d:{en:'Has a three-day beard. His N95 looks well placed, but when he breathes out you see the mask edges lift along his jaw.',hi:'तीन दिन की दाढ़ी है। उसका N95 ठीक लगा दिखता है, पर साँस छोड़ने पर जबड़े के पास मास्क के किनारे उठते दिखते हैं।'},
+     opts:[
+      {n:{en:'Looks fine, carry on',hi:'ठीक लगता है, चलने दें'}, leak:0.35, ok:false, msg:{en:'Facial hair under the seal can let in a large share of air. Ravi now has the worst protection on the team.',hi:'सील के नीचे दाढ़ी से बहुत सारी हवा अंदर आ सकती है। अब रवि की सुरक्षा टीम में सबसे कमज़ोर है।'}},
+      {n:{en:'Tighten his straps hard',hi:'उसकी पट्टियाँ ज़ोर से कस दें'}, leak:0.25, ok:false, msg:{en:'Tighter straps do not seal over stubble, and they hurt. The gap stays.',hi:'कसी पट्टियाँ दाढ़ी के ऊपर सील नहीं बनातीं, और दर्द देती हैं। गैप बना रहता है।'}},
+      {n:{en:'Move him to the triage desk role and send the clean-shaven member to the ambulance',hi:'उसे ट्राइएज डेस्क पर भेजें और क्लीन-शेव साथी को एम्बुलेंस में'}, leak:0.05, ok:true, msg:{en:'Good call. Reassign until he can shave, or use a loose-fitting powered respirator (PAPR) if one is available.',hi:'सही फ़ैसला। जब तक वह शेव न कर ले, काम बदलें, या अगर उपलब्ध हो तो ढीला पावर्ड रेस्पिरेटर (PAPR) इस्तेमाल करें।'}}
+     ]},
+    {k:'anjali', name:'Anjali', d:{en:'Her bottom strap is hooked over her ears instead of behind her neck. She says it is more comfortable.',hi:'उसकी नीचे की पट्टी गर्दन के पीछे के बजाय कानों पर फँसी है। वह कहती है कि ऐसे आराम मिलता है।'},
+     opts:[
+      {n:{en:'Ask her to move the strap below her ears and redo the seal check',hi:'उससे पट्टी कानों के नीचे करने और सील चेक दोबारा करने को कहें'}, leak:0.04, ok:true, msg:{en:'Right. Straps over the ears tilt the mask and open the lower edge.',hi:'सही। कानों पर पट्टी से मास्क झुकता है और नीचे का किनारा खुलता है।'}},
+      {n:{en:'Leave it, comfort matters for long shifts',hi:'रहने दें, लंबी शिफ़्ट में आराम ज़रूरी है'}, leak:0.2, ok:false, msg:{en:'Comfort matters, but this position leaks. Help her adjust, and plan breaks instead.',hi:'आराम ज़रूरी है, पर ऐसे लीक होता है। उसकी मदद करें, और ब्रेक की योजना बनाएँ।'}}
+     ]},
+    {k:'faiz', name:'Faiz', d:{en:'Mask moulded at the nose, straps placed correctly, seal check done in front of you.',hi:'नाक पर मास्क का आकार ठीक, पट्टियाँ सही जगह, आपके सामने सील चेक किया।'},
+     opts:[
+      {n:{en:'All good, give a thumbs up',hi:'सब ठीक है, शाबाशी दें'}, leak:0.04, ok:true, msg:{en:'Yes. A buddy check also means saying when someone has it right.',hi:'हाँ। बडी चेक का मतलब यह भी है कि जब कोई सही करे तो बताएँ।'}},
+      {n:{en:'Make him redo everything to be safe',hi:'सुरक्षा के लिए सब कुछ दोबारा करवाएँ'}, leak:0.04, ok:false, msg:{en:'His fit was fine. Redoing correct work wastes time and masks during an emergency.',hi:'उसका फिट ठीक था। इमरजेंसी में सही काम दोबारा करवाने से समय और मास्क बर्बाद होते हैं।'}}
+     ]}
+  ];
+  const c = card(stepLabel(6), h('h2',null,T({en:'Buddy check your team',hi:'अपनी टीम का बडी चेक करें'})),
+    h('p',{class:'muted'},T({en:'Before the ambulance leaves, look at each teammate. Watch the meter at the top.',hi:'एम्बुलेंस निकलने से पहले हर साथी को देखें। ऊपर मीटर देखते रहें।'})));
+  let done=0;
+  mates.forEach(m=>{
+    const w = h('div',{class:'item'}, h('div',{class:'t'},m.name), h('div',{class:'d'},T(m.d)));
+    const fbBox = h('div');
+    m.opts.forEach(o=>{
+      const b = h('button',{class:'btn'},T(o.n));
+      b.onclick = ()=>{
+        [...w.querySelectorAll('.btn')].forEach(x=>x.disabled=true);
+        b.classList.add(o.ok?'ok':'no');
+        if(!o.ok) miss('buddy_'+m.k, {en:m.name+': '+o.n.en, hi:m.name+': '+o.n.hi});
+        S.leak[m.k]=o.leak; updMeter();
+        fbBox.append(fb(o.ok?'good':'bad',o.msg));
+        if(++done===mates.length){
+          c.append(fb('warn',{en:'Why one teammate matters so much: team exposure is the average of everyone\'s leakage. Three people at 4% and one at 35% average to about 12%, three times worse than if all four were at 4%.',hi:'एक साथी इतना मायने क्यों रखता है: टीम का एक्सपोज़र सबके लीकेज का औसत है। तीन लोग 4% पर और एक 35% पर हो तो औसत लगभग 12% होता है, जो चारों के 4% पर होने से तीन गुना बुरा है।'}));
+          showNext();
+        }
+      };
+      w.append(b);
+    });
+    w.append(fbBox);
+    c.append(w);
+  });
+  return [c, card(h('h3',null,T({en:'Your team',hi:'आपकी टीम'})), teamRow())];
+}},
+/* 8. Doffing */
+{id:'doff', render(){ return orderScreen({
+  n:7,
+  title:{en:'The patient is handed over. Take off your PPE safely',hi:'मरीज़ सौंप दिया गया। अपना PPE सुरक्षित तरीके से उतारें'},
+  hint:{en:'Doffing is where most self-contamination happens. Tap the steps in order. Watch for traps.',hi:'ज़्यादातर खुद का संक्रमण उतारते समय होता है। चरणों को क्रम से टैप करें। जाल से बचें।'},
+  steps:[
+    {en:'Remove gloves (glove-in-glove)',hi:'दस्ताने उतारें (दस्ताने के अंदर दस्ताना)'},
+    {en:'Hand hygiene',hi:'हाथों की सफ़ाई'},
+    {en:'Remove gown, rolling it inside out',hi:'गाउन उतारें, अंदर की ओर लपेटते हुए'},
+    {en:'Remove goggles by the strap from behind',hi:'गॉगल्स पीछे की पट्टी से उतारें'},
+    {en:'Step out of the room',hi:'कमरे से बाहर आएँ'},
+    {en:'Remove N95: bottom strap, then top strap, without touching the front',hi:'N95 उतारें: पहले नीचे की पट्टी, फिर ऊपर की, सामने का हिस्सा छुए बिना'},
+    {en:'Hand hygiene',hi:'हाथों की सफ़ाई'}
+  ],
+  traps:[
+    {n:{en:'Pull the N95 off by the front',hi:'N95 को सामने से पकड़कर खींचें'}, msg:{en:'The front of the mask is the most contaminated surface. Touching it moves virus to your hands and face.',hi:'मास्क का सामने वाला हिस्सा सबसे ज़्यादा दूषित होता है। उसे छूने से वायरस आपके हाथों और चेहरे तक पहुँचता है।'}},
+    {n:{en:'Adjust goggles with gloved hands',hi:'दस्ताने पहने हाथों से गॉगल्स ठीक करें'}, msg:{en:'Contaminated gloves near your eyes is a classic route of infection. Clean hands first, handle by the strap.',hi:'आँखों के पास दूषित दस्ताने संक्रमण का आम रास्ता है। पहले हाथ साफ़ करें, पट्टी से पकड़ें।'}}
+  ],
+  why:{en:'Gloves come off first because they are the dirtiest. Clean hands between steps. The N95 comes off last and outside the room, because the air inside may still carry virus.',hi:'दस्ताने पहले उतरते हैं क्योंकि वे सबसे गंदे होते हैं। हर चरण के बीच हाथ साफ़ करें। N95 सबसे आखिर में और कमरे के बाहर उतरता है, क्योंकि अंदर की हवा में अब भी वायरस हो सकता है।'},
+  code:'doff_order', contam:true
+}); }},
+/* 9. Disposal and log */
+{id:'waste', render(){
+  hideNext();
+  const items = [
+    {n:{en:'Used N95',hi:'इस्तेमाल किया N95'}, a:'yellow'},
+    {n:{en:'Used gown',hi:'इस्तेमाल किया गाउन'}, a:'yellow'},
+    {n:{en:'Used gloves',hi:'इस्तेमाल किए दस्ताने'}, a:'red'},
+    {n:{en:'Reusable goggles',hi:'दोबारा इस्तेमाल होने वाले गॉगल्स'}, a:'disinfect'}
+  ];
+  const bins = [
+    {k:'yellow', n:{en:'Yellow bag',hi:'पीला बैग'}},
+    {k:'red', n:{en:'Red bag',hi:'लाल बैग'}},
+    {k:'disinfect', n:{en:'Disinfect and reuse',hi:'कीटाणुरहित करें, दोबारा इस्तेमाल'}},
+    {k:'general', n:{en:'General waste',hi:'सामान्य कचरा'}}
+  ];
+  const c = card(stepLabel(8), h('h2',null,T({en:'Dispose, decontaminate, log',hi:'निपटान, कीटाणुशोधन, लॉग'})),
+    h('p',{class:'muted'},T({en:'Colour codes follow India\'s Bio-Medical Waste Management Rules. Check your facility\'s chart.',hi:'रंग कोड भारत के बायो-मेडिकल वेस्ट मैनेजमेंट नियमों के अनुसार हैं। अपनी संस्था का चार्ट देखें।'})));
+  let done=0; const total = items.length+1;
+  items.forEach(it=>{
+    const w = h('div',{class:'item'}, h('div',{class:'t'},T(it.n)));
+    const g = h('div',{class:'row2'});
+    bins.forEach(bn=>{
+      const b = h('button',{class:'btn'},T(bn.n));
+      b.onclick=()=>{
+        [...g.children].forEach(x=>x.disabled=true);
+        const ok = bn.k===it.a;
+        b.classList.add(ok?'ok':'no');
+        if(!ok){ miss('waste', {en:it.n.en+' into '+bn.n.en, hi:it.n.hi+' → '+bn.n.hi}); g.children[bins.findIndex(x=>x.k===it.a)].classList.add('ok'); }
+        if(++done===total) showNext();
+      };
+      g.append(b);
+    });
+    w.append(g); c.append(w);
+  });
+  // stock log question
+  const q = h('div',{class:'item'}, h('div',{class:'t'},T({en:'Stock log. The shelf had 40 usable N95s this morning. Your 4-person team used one each, and you rejected 15 bad masks from other boxes. What do you write as usable N95s left?',hi:'स्टॉक लॉग। आज सुबह शेल्फ़ पर 40 इस्तेमाल लायक N95 थे। आपकी 4 लोगों की टीम ने एक-एक इस्तेमाल किया, और आपने दूसरे डिब्बों से 15 खराब मास्क हटाए। आप बचे हुए इस्तेमाल लायक N95 कितने लिखेंगे?'})));
+  const fbq = h('div');
+  const g2 = h('div',{class:'row2'});
+  [21,36,25,40].forEach(v=>{
+    const b = h('button',{class:'btn'},String(v));
+    b.onclick=()=>{
+      [...g2.children].forEach(x=>x.disabled=true);
+      const ok = v===36;
+      b.classList.add(ok?'ok':'no');
+      if(!ok) miss('log', {en:'Stock log wrote '+v, hi:'स्टॉक लॉग में '+v+' लिखा'});
+      fbq.append(fb(ok?'good':'bad',{en:'36. The 15 rejected masks were never counted as usable, so only the 4 used come off. Log the rejects separately with their box and reason, so the buyer can replace them before the next outbreak.',hi:'36। हटाए गए 15 मास्क कभी इस्तेमाल लायक गिने ही नहीं गए थे, इसलिए सिर्फ़ इस्तेमाल हुए 4 घटेंगे। हटाए गए मास्क अलग से डिब्बे और कारण के साथ दर्ज करें, ताकि अगले प्रकोप से पहले उन्हें बदला जा सके।'}));
+      if(++done===total) showNext();
+    };
+    g2.append(b);
+  });
+  q.append(g2,fbq); c.append(q);
+  return [c];
+}},
+/* 10. Post quiz */
+{id:'post', render(){ return quizScreen('post'); }},
+/* 11. Results */
+{id:'results', render(){
+  hideNext();
+  const L = teamLeak() ?? 1;
+  const pct = Math.round((1-L)*100);
+  const summary = {
+    v:1, game:'mask-drill', finished: new Date().toISOString(), seconds: Math.round((Date.now()-S.t0)/1000), lang:LANG,
+    team_avg_leakage: +L.toFixed(3), team_protection_factor: +(1/L).toFixed(1), self_contamination_events: S.contam,
+    leakage_by_member: S.leak, pre: {confidence:S.pre.conf, score:S.pre.score}, post:{confidence:S.post.conf, score:S.post.score},
+    mistakes: S.mistakes.map(m=>m.code)
+  };
+  if(!S.saved){ S.saved=true; try {
+    const all = JSON.parse(localStorage.getItem('md_runs')||'[]'); all.push(summary);
+    localStorage.setItem('md_runs', JSON.stringify(all.slice(-50)));
+  } catch(e){} }
+  const tbl = h('table',null,
+    h('tr',null,h('th',null,''),h('th',null,T({en:'Before',hi:'पहले'})),h('th',null,T({en:'After',hi:'बाद'}))),
+    h('tr',null,h('td',null,T({en:'Quiz score',hi:'क्विज़ स्कोर'})),h('td',null,(S.pre.score??'–')+'/4'),h('td',null,(S.post.score??'–')+'/4')),
+    h('tr',null,h('td',null,T({en:'Confidence',hi:'भरोसा'})),h('td',null,(S.pre.conf??'–')+'/5'),h('td',null,(S.post.conf??'–')+'/5'))
+  );
+  const mlist = h('div');
+  if(S.mistakes.length===0) mlist.append(fb('good',{en:'No mistakes. Excellent drill.',hi:'कोई गलती नहीं। शानदार ड्रिल।'}));
+  else {
+    const seen = {};
+    S.mistakes.forEach(m=>{
+      const key = GROUP[m.code] ? m.code : m.code+'|'+m.note.en;
+      if(!seen[key]) seen[key] = {label: GROUP[m.code] || m.note, n:0};
+      seen[key].n++;
+    });
+    Object.values(seen).forEach(g=>mlist.append(h('div',{class:'chip'}, T(g.label) + (g.n>1 ? ' ×'+g.n : ''))));
+  }
+  const exp = h('button',{class:'btn'},T(UI.export));
+  exp.onclick = ()=>{
+    let runs=[summary]; try{ runs = JSON.parse(localStorage.getItem('md_runs')||'[]'); }catch(e){}
+    const blob = new Blob([JSON.stringify(runs,null,2)],{type:'application/json'});
+    const a = h('a',{href:URL.createObjectURL(blob),download:'mask-drill-results.json'}); document.body.append(a); a.click(); a.remove();
+  };
+  const again = h('button',{class:'btn primary'},T(UI.restart));
+  again.onclick = ()=>{ S.i=0; render(); window.scrollTo(0,0); };
+  return [
+    card(h('h2',null,T({en:'Drill complete',hi:'ड्रिल पूरी'})),
+      h('div',{class:'muted'},T({en:'Team average protection',hi:'टीम की औसत सुरक्षा'})),
+      h('div',{class:'big'},pct+'%'),
+      h('p',null,T({en:'Effective team protection factor: ',hi:'टीम का प्रभावी सुरक्षा गुणांक: '})+(1/L).toFixed(1)+'. '+T({en:'A perfect N95 team would be about 30.',hi:'पूरी तरह सही N95 टीम का लगभग 30 होगा।'})),
+      h('p',null,T({en:'Self-contamination events while doffing: ',hi:'उतारते समय खुद के संक्रमण की घटनाएँ: '})+S.contam),
+      teamRow()),
+    card(h('h3',null,T({en:'What to work on',hi:'किस पर काम करें'})), mlist),
+    card(h('h3',null,T({en:'Before and after',hi:'पहले और बाद'})), tbl,
+      h('p',{class:'muted',style:'margin-top:10px'},T({en:'Results are stored only on this phone. Trainers can collect the file from each phone after a session.',hi:'नतीजे सिर्फ़ इसी फ़ोन पर रहते हैं। ट्रेनर सत्र के बाद हर फ़ोन से फ़ाइल ले सकते हैं।'})), exp),
+    card(h('h3',null,T({en:'Three things to remember',hi:'याद रखने लायक तीन बातें'})),
+      h('p',null,'1. '+T({en:'Seal check every time. Fit test every year.',hi:'हर बार सील चेक। हर साल फिट टेस्ट।'})),
+      h('p',null,'2. '+T({en:'Never touch the front of a used mask. Straps only, bottom first.',hi:'इस्तेमाल किए मास्क का सामने का हिस्सा कभी न छुएँ। सिर्फ़ पट्टियाँ, पहले नीचे वाली।'})),
+      h('p',null,'3. '+T({en:'Check your buddy. The team is only as protected as its leakiest mask.',hi:'अपने साथी की जाँच करें। टीम उतनी ही सुरक्षित है जितना उसका सबसे ज़्यादा लीक होने वाला मास्क।'})),
+      again)
+  ];
+}}
+];
+
+/* ============ Reusable: ordering screen ============ */
+function orderScreen(cfg){
+  hideNext();
+  const pool = cfg.steps.map((s,i)=>({s, i, trap:false})).concat((cfg.traps||[]).map(t=>({s:t.n, trap:true, msg:t.msg})));
+  const picked = [];
+  let errors = 0, locked=false;
+  const c = card(stepLabel(cfg.n), h('h2',null,T(cfg.title)), h('p',{class:'muted'},T(cfg.hint)));
+  const seq = h('div',{class:'seq'});
+  const fbBox = h('div');
+  const grid = h('div');
+  function onPick(item, b){
+    if(locked) return;
+    fbBox.innerHTML='';
+    if(item.trap){
+      errors++; if(cfg.contam) S.contam++;
+      b.classList.add('no'); b.disabled=true;
+      miss(cfg.code+'_trap', item.s);
+      fbBox.append(fb('bad', item.msg));
+      return;
+    }
+    const expected = picked.length;
+    // duplicate labels (two "Hand hygiene") are interchangeable
+    const ok = T(cfg.steps[expected])===T(item.s);
+    if(ok){
+      picked.push(item); b.disabled=true; b.classList.add('ok');
+      seq.append(h('span',{class:'chip'},(picked.length)+'. '+T(item.s)));
+      if(picked.length===cfg.steps.length){
+        locked=true;
+        [...grid.querySelectorAll('.btn')].forEach(x=>x.disabled=true);
+        fbBox.append(fb(errors?'warn':'good', cfg.why));
+        showNext();
+      }
+    } else {
+      errors++; if(cfg.contam && expected>=1) S.contam++;
+      miss(cfg.code, {en:'Out of order: '+item.s.en+' at step '+(expected+1), hi:'गलत क्रम: चरण '+(expected+1)+' पर '+item.s.hi});
+      b.classList.add('no'); setTimeout(()=>b.classList.remove('no'),700);
+      fbBox.append(fb('bad',{en:'Not yet. What should come at step '+(expected+1)+'?',hi:'अभी नहीं। चरण '+(expected+1)+' पर क्या आना चाहिए?'}));
+    }
+  }
+  shuffle(pool).forEach(item=>{
+    const b = h('button',{class:'btn'},T(item.s));
+    b.onclick=()=>onPick(item,b);
+    grid.append(b);
+  });
+  c.append(seq, fbBox, grid);
+  return [c];
+}
+
+/* ============ Visuals ============ */
+function teamRow(){
+  const row = h('div',{class:'team'});
+  [['you',T(UI.you)],['ravi','Ravi'],['anjali','Anjali'],['faiz','Faiz']].forEach(([k,n])=>{
+    const L = S.leak[k];
+    const col = L===null ? '#8a9490' : L<=0.06 ? '#1f7a3f' : L<=0.15 ? '#c18a00' : '#b3261e';
+    const txt = L===null ? '?' : Math.round((1-L)*100)+'';
+    row.append(h('div',{class:'mem'}, h('div',{class:'dot',style:'background:'+col}, txt), n));
+  });
+  return row;
+}
+function faceSVG(l){
+  const puff = (x,y)=>`<g class="leak"><circle cx="${x}" cy="${y}" r="5" fill="#2f7fd6" stroke="#fff" stroke-width="1.5"/><circle cx="${x+7}" cy="${y-6}" r="3.5" fill="#2f7fd6" stroke="#fff" stroke-width="1.5"/></g>`;
+  return `<svg class="face" viewBox="0 0 200 220" role="img" aria-label="Face with N95 mask">
+    <ellipse cx="100" cy="105" rx="70" ry="90" fill="#c99a76"/>
+    <ellipse cx="72" cy="80" rx="8" ry="5" fill="#2b2b2b"/><ellipse cx="128" cy="80" rx="8" ry="5" fill="#2b2b2b"/>
+    <path d="M40 105 Q100 90 160 105 Q158 165 100 185 Q42 165 40 105Z" fill="#f2f2f0" stroke="#9aa" stroke-width="2"/>
+    <path d="M85 100 Q100 93 115 100" stroke="#777" stroke-width="3" fill="none"/>
+    <line x1="40" y1="110" x2="20" y2="100" stroke="#3a6ea5" stroke-width="3"/><line x1="160" y1="110" x2="180" y2="100" stroke="#3a6ea5" stroke-width="3"/>
+    <line x1="48" y1="150" x2="22" y2="160" stroke="#3a6ea5" stroke-width="3"/><line x1="152" y1="150" x2="178" y2="160" stroke="#3a6ea5" stroke-width="3"/>
+    ${l.nose?puff(82,88)+puff(112,88):''}
+    ${l.side?puff(32,128)+puff(162,128):''}
+    ${l.chin?puff(96,192):''}
+  </svg>`;
+}
+
+/* ============ Render loop ============ */
+function render(){
+  document.documentElement.lang = LANG==='hi'?'hi':'en';
+  document.getElementById('title').textContent = T(UI.title);
+  document.getElementById('langBtn').textContent = LANG==='hi' ? 'English' : 'हिन्दी';
+  $app.innerHTML='';
+  SCREENS[S.i].render().forEach(n=>$app.append(n));
+  updMeter();
+}
+document.getElementById('langBtn').onclick = ()=>{
+  LANG = LANG==='hi'?'en':'hi';
+  try{ localStorage.setItem('md_lang',LANG); }catch(e){}
+  // Switching language redraws the current screen from its start, so drop what it already recorded.
+  const id = SCREENS[S.i].id;
+  S.mistakes = S.mistakes.filter(m=>m.at!==id);
+  if(id==='doff') S.contam = 0;
+  render();
+};
+render();
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
