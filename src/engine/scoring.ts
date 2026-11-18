@@ -1,4 +1,4 @@
-import { FILTER_PENETRATION, LEAKAGE_PENALTY, PROTECTION_BAND_MIN } from './constants';
+import { FILTER_PENETRATION, HARMFUL_SEAL_ACTION_PENALTY, LEAKAGE_PENALTY, PROTECTION_BAND_MIN } from './constants';
 
 export type MaskKind = keyof typeof FILTER_PENETRATION;
 export type LeakageFault = keyof typeof LEAKAGE_PENALTY;
@@ -25,10 +25,19 @@ export function teamProtection(members: readonly ScoredMember[]): TeamProtection
   return { leakage, pf: 1 / leakage, percent: (1 - leakage) * 100 };
 }
 
-/** One member's leakage: filter penetration plus a penalty per fault, capped at 1. */
-export function memberLeakage(fit: { mask: MaskKind; faults?: readonly LeakageFault[] }): number {
+/** What the leakage model needs to know about one masked-up member. */
+export interface Fit {
+  mask: MaskKind;
+  faults?: readonly LeakageFault[];
+  /** How many harmful things were done during the seal check. */
+  harmfulSealActions?: number;
+}
+
+/** One member's leakage: filter penetration, plus a penalty per fault and per harmful seal action, capped at 1. */
+export function memberLeakage(fit: Fit): number {
   const penalties = (fit.faults ?? []).reduce((sum, f) => sum + LEAKAGE_PENALTY[f], 0);
-  return Math.min(1, FILTER_PENETRATION[fit.mask] + penalties);
+  const sealHarm = (fit.harmfulSealActions ?? 0) * HARMFUL_SEAL_ACTION_PENALTY;
+  return Math.min(1, FILTER_PENETRATION[fit.mask] + penalties + sealHarm);
 }
 
 export type ProtectionBand = 'good' | 'warn' | 'bad';

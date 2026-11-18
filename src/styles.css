@@ -132,3 +132,16 @@ h3 { font-size: 16px; margin: 12px 0 6px; }
   border: 1.5px dashed var(--line); border-radius: 10px;
 }
 .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; background: var(--brand); color: var(--brand-ink); }
+
+/* Seal check: the face drawing, with a puff of air at each site that still leaks. */
+.face { display: block; width: 200px; max-width: 60%; height: auto; margin: 4px auto 8px; }
+.leak { animation: puff 1.2s ease-in-out infinite; }
+@keyframes puff {
+  0% { opacity: 0.35; transform: translateY(0); }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; transform: translateY(-6px); }
+}
+/* Without motion the puffs stay put and fully visible, so the leak is still shown. */
+@media (prefers-reduced-motion: reduce) {
+  .leak { animation: none; opacity: 1; }
+}

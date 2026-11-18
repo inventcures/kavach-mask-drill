@@ -59,3 +59,17 @@ describe('protection band', () => {
     expect(protectionBand(0)).toBe('bad');
   });
 });
+
+describe('leakage after the seal check', () => {
+  test('each harmful seal action adds 3 points of leakage to the base', () => {
+    expect(memberLeakage({ mask: 'n95', harmfulSealActions: 2 })).toBeCloseTo(0.09, 10);
+  });
+
+  test('harmful seal actions and the stock penalty add up', () => {
+    expect(memberLeakage({ mask: 'n95', faults: ['badStock'], harmfulSealActions: 3 })).toBeCloseTo(0.27, 10);
+  });
+
+  test('leakage stays capped at 1 however many harmful actions there were', () => {
+    expect(memberLeakage({ mask: 'cloth', faults: ['badStock', 'facialHair'], harmfulSealActions: 3 })).toBe(1);
+  });
+});

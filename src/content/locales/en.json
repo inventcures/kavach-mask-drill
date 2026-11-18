@@ -17,7 +17,7 @@
   "drill.next": "Next",
   "drill.restart": "Play again",
   "drill.end.heading": "You have finished this part of the drill",
-  "drill.end.body": "The seal check, the buddy check, waste disposal and your results come next. They are still being built.",
+  "drill.end.body": "Waste disposal, a short quiz and your results come next. They are still being built.",
   "drill.end.continue": "Continue (coming next)",
   "fb.good": "Right",
   "fb.bad": "Wrong",
@@ -26,5 +26,11 @@
   "stock.use": "Use",
   "stock.reject": "Reject",
   "sequence.placed": "Steps done so far",
-  "sequence.notYet": "Not yet. What should come at step {n}?"
+  "sequence.notYet": "Not yet. What should come at step {n}?",
+  "seal.leaksLeft": "Leaks remaining: {n}",
+  "seal.face.sealed": "Face wearing an N95 mask. No air is escaping.",
+  "seal.face.leaking": "Face wearing an N95 mask. Air is escaping at: {sites}.",
+  "seal.site.nose": "the nose",
+  "seal.site.side": "the sides",
+  "seal.site.chin": "the chin"
 }

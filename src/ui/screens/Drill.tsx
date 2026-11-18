@@ -4,7 +4,9 @@ import { canAdvance, currentScreen, teamMembers, type Action, type SessionState 
 import { Meter } from '../components/Meter';
 import { t, type Lang } from '../i18n';
 import { Briefing } from './Briefing';
+import { Buddy } from './Buddy';
 import { Choice } from './Choice';
+import { Seal } from './Seal';
 import { Sequence } from './Sequence';
 import { StockCheck } from './StockCheck';
 
@@ -62,6 +64,26 @@ export function Drill({ lang, scenario, session, dispatch }: Props) {
           )}
           {screen.kind === 'sequence' && progress?.kind === 'sequence' && (
             <Sequence lang={lang} screen={screen} progress={progress} onTap={(cardId) => dispatch({ type: 'tapCard', cardId })} />
+          )}
+          {screen.kind === 'seal' && progress?.kind === 'seal' && (
+            <Seal
+              lang={lang}
+              screen={screen}
+              open={progress.open}
+              harmDone={progress.harmDone}
+              last={progress.last}
+              badStock={session.fits.you?.faults.includes('badStock') ?? false}
+              onAction={(actionId) => dispatch({ type: 'sealAction', actionId })}
+            />
+          )}
+          {screen.kind === 'buddy' && progress?.kind === 'buddy' && (
+            <Buddy
+              lang={lang}
+              screen={screen}
+              names={Object.fromEntries(scenario.team.map((m) => [m.id, m.name]))}
+              picks={progress.picks}
+              onPick={(memberId, optionId) => dispatch({ type: 'buddyPick', memberId, optionId })}
+            />
           )}
         </section>
       </main>

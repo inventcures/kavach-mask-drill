@@ -31,5 +31,11 @@ export const LEAKAGE_PENALTY = {
   badStock: 0.15,
 } as const;
 
+/**
+ * Extra leakage for each harmful thing the player did during the seal check
+ * (pinching the clip, crossing the straps, stuffing tissue), even after the leak is fixed.
+ */
+export const HARMFUL_SEAL_ACTION_PENALTY = 0.03;
+
 /** Team protection % at or above which the meter reads "good", and "warn". Below `warn` is "bad". */
 export const PROTECTION_BAND_MIN = { good: 90, warn: 70 } as const;

@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { sidewaysOverflow, watchPage } from './support';
+import { checkBuddiesWell, fixEveryLeak, sidewaysOverflow, watchPage } from './support';
 
 const DON = ['Hand hygiene', 'Gown', 'N95', 'Seal check', 'Goggles or face shield', 'Gloves (over gown cuffs)'];
 const DOFF = [
@@ -37,7 +37,7 @@ test('a perfect run goes from the alert to the end of doffing', async ({ page, b
   await startDrill(page);
 
   await expect(page.getByRole('heading', { name: 'Alert: suspected Nipah case' })).toBeVisible();
-  await expect(page.getByText('Step 1 / 5')).toBeVisible();
+  await expect(page.getByText('Step 1 / 7')).toBeVisible();
   await expect(page.getByTestId('team-row').locator('.dot')).toHaveText(['?', '?', '?', '?']);
   await expect(page.getByTestId('meter')).toHaveCount(0);
   await next(page);
@@ -64,6 +64,16 @@ test('a perfect run goes from the alert to the end of doffing', async ({ page, b
   await expect(page.getByTestId('placed').locator('li')).toHaveText(DON.map((label, i) => `${i + 1}. ${label}`));
   await expect(page.getByTestId('feedback')).toContainText('gloves last so they cover the gown cuffs');
   await expect(page.getByTestId('feedback').getByRole('img', { name: 'Right' })).toBeVisible();
+  await next(page);
+
+  await expect(page.getByRole('heading', { name: 'Get a good seal' })).toBeVisible();
+  await fixEveryLeak(page);
+  await expect(page.getByTestId('seal-passed')).toContainText('Seal check passed');
+  await next(page);
+
+  await expect(page.getByRole('heading', { name: 'Buddy check your team' })).toBeVisible();
+  await checkBuddiesWell(page);
+  await expect(page.getByTestId('meter-value')).toHaveText('96% · PF 25.0');
   await next(page);
 
   await expect(page.getByRole('heading', { name: 'Take off your PPE safely' })).toBeVisible();
@@ -101,7 +111,7 @@ test('mistakes get immediate feedback, move the meter, and survive a language sw
   await expect(transfer.getByRole('button', { name: 'कपड़े का मास्क' })).toBeDisabled();
   await expect(page.getByTestId('task-triage').getByRole('button', { name: 'सर्जिकल मास्क' })).toBeEnabled();
   await expect(page.getByTestId('meter-value')).toHaveText('40% · PF 1.7');
-  await expect(page.getByText('चरण 2 / 5')).toBeVisible();
+  await expect(page.getByText('चरण 2 / 7')).toBeVisible();
   await page.getByRole('button', { name: 'English' }).click();
   await expect(page.getByTestId('meter-value')).toHaveText('40% · PF 1.7');
   await option(page, 'triage', 'Surgical mask').click();
@@ -129,6 +139,13 @@ test('mistakes get immediate feedback, move the meter, and survive a language sw
   for (const label of DON.slice(2)) await card(page, label).click();
   // Finished with an error on the way: the explanation comes as a note, not as a tick.
   await expect(page.getByTestId('feedback').getByRole('img', { name: 'Note' })).toBeVisible();
+  await next(page);
+
+  // Bad stock went through earlier, so even a clean seal check ends with a warning about it.
+  await fixEveryLeak(page);
+  await expect(page.getByTestId('seal-passed')).toContainText('a mask from the bad stock reached your team');
+  await next(page);
+  await checkBuddiesWell(page);
   await next(page);
 
   // Doffing trap: the card is disabled and the reason is shown.

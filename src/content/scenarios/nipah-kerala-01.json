@@ -178,6 +178,164 @@
       }
     },
     {
+      "kind": "seal",
+      "id": "seal",
+      "title": { "en": "Get a good seal", "hi": "अच्छा सील बनाएँ" },
+      "hint": {
+        "en": "You put on the N95. Cover it with both hands and breathe out sharply. Where do you feel air escaping? Fix each leak.",
+        "hi": "आपने N95 पहन लिया। दोनों हाथों से ढकें और ज़ोर से साँस छोड़ें। हवा कहाँ से निकल रही है? हर लीक ठीक करें।"
+      },
+      "actions": [
+        {
+          "id": "pinch",
+          "harmful": true,
+          "reopens": "nose",
+          "label": { "en": "Pinch the nose clip with one hand", "hi": "एक हाथ से नाक की क्लिप दबाएँ" },
+          "explain": {
+            "en": "Pinching with one hand bends the clip into a V and leaves gaps on both sides of the nose.",
+            "hi": "एक हाथ से दबाने पर क्लिप V आकार में मुड़ जाती है और नाक के दोनों तरफ़ गैप रह जाता है।"
+          }
+        },
+        {
+          "id": "mould",
+          "fixes": "nose",
+          "label": { "en": "Mould the nose clip with fingertips of both hands, from the middle outwards", "hi": "दोनों हाथों की उँगलियों से नाक की क्लिप को बीच से बाहर की ओर दबाकर आकार दें" },
+          "explain": { "en": "Good. The clip now follows the shape of your nose.", "hi": "बढ़िया। क्लिप अब आपकी नाक के आकार में है।" }
+        },
+        {
+          "id": "straps",
+          "fixes": "side",
+          "label": { "en": "Top strap high on the crown, bottom strap at the back of the neck below the ears", "hi": "ऊपर की पट्टी सिर के ऊपरी हिस्से पर, नीचे की पट्टी कानों के नीचे गर्दन के पीछे" },
+          "explain": { "en": "Good. Correct strap position pulls the sides flat against your cheeks.", "hi": "बढ़िया। पट्टियों की सही जगह से किनारे गालों से चिपक जाते हैं।" }
+        },
+        {
+          "id": "cross",
+          "harmful": true,
+          "reopens": "side",
+          "label": { "en": "Cross the straps to make them tighter", "hi": "पट्टियों को कसने के लिए क्रॉस करें" },
+          "explain": { "en": "Crossing straps distorts the mask and opens gaps at the sides.", "hi": "पट्टियाँ क्रॉस करने से मास्क टेढ़ा होता है और किनारों पर गैप बनते हैं।" }
+        },
+        {
+          "id": "chin",
+          "fixes": "chin",
+          "label": { "en": "Pull the bottom of the mask down under your chin", "hi": "मास्क का निचला हिस्सा ठोड़ी के नीचे तक खींचें" },
+          "explain": { "en": "Good. The mask now cups your chin.", "hi": "बढ़िया। मास्क अब ठोड़ी को ढक रहा है।" }
+        },
+        {
+          "id": "tape",
+          "harmful": true,
+          "label": { "en": "Stuff tissue into the gaps", "hi": "गैप में टिश्यू भर दें" },
+          "explain": { "en": "Never put anything between the mask and your face. It creates a channel for air to leak in.", "hi": "मास्क और चेहरे के बीच कभी कुछ न रखें। इससे हवा अंदर आने का रास्ता बनता है।" }
+        }
+      ],
+      "passed": {
+        "en": "No air escapes when you breathe out, and the mask pulls in slightly when you breathe in. Seal check passed.",
+        "hi": "साँस छोड़ने पर हवा बाहर नहीं निकलती, और साँस लेने पर मास्क थोड़ा अंदर खिंचता है। सील चेक पास।"
+      },
+      "notFitTest": {
+        "en": "Remember: a seal check is done every time you put a mask on. It does not replace a yearly fit test, which checks that this model suits your face.",
+        "hi": "याद रखें: सील चेक हर बार मास्क पहनने पर किया जाता है। यह सालाना फिट टेस्ट की जगह नहीं लेता, जो जाँचता है कि यह मॉडल आपके चेहरे पर फिट है।"
+      },
+      "badStockNote": {
+        "en": "But a mask from the bad stock reached your team. A perished strap or damp filter adds leakage even with good technique.",
+        "hi": "लेकिन खराब स्टॉक का एक मास्क आपकी टीम तक पहुँच गया। खराब पट्टी या गीला फ़िल्टर अच्छी तकनीक के बावजूद लीकेज बढ़ाता है।"
+      }
+    },
+    {
+      "kind": "buddy",
+      "id": "buddy",
+      "title": { "en": "Buddy check your team", "hi": "अपनी टीम का बडी चेक करें" },
+      "hint": { "en": "Before the ambulance leaves, look at each teammate. Watch the meter at the top.", "hi": "एम्बुलेंस निकलने से पहले हर साथी को देखें। ऊपर मीटर देखते रहें।" },
+      "mates": [
+        {
+          "member": "ravi",
+          "detail": {
+            "en": "Has a three-day beard. His N95 looks well placed, but when he breathes out you see the mask edges lift along his jaw.",
+            "hi": "तीन दिन की दाढ़ी है। उसका N95 ठीक लगा दिखता है, पर साँस छोड़ने पर जबड़े के पास मास्क के किनारे उठते दिखते हैं।"
+          },
+          "options": [
+            {
+              "id": "fine",
+              "ok": false,
+              "leakage": 0.35,
+              "label": { "en": "Looks fine, carry on", "hi": "ठीक लगता है, चलने दें" },
+              "explain": {
+                "en": "Facial hair under the seal can let in a large share of air. Ravi now has the worst protection on the team.",
+                "hi": "सील के नीचे दाढ़ी से बहुत सारी हवा अंदर आ सकती है। अब रवि की सुरक्षा टीम में सबसे कमज़ोर है।"
+              }
+            },
+            {
+              "id": "tighten",
+              "ok": false,
+              "leakage": 0.25,
+              "label": { "en": "Tighten his straps hard", "hi": "उसकी पट्टियाँ ज़ोर से कस दें" },
+              "explain": { "en": "Tighter straps do not seal over stubble, and they hurt. The gap stays.", "hi": "कसी पट्टियाँ दाढ़ी के ऊपर सील नहीं बनातीं, और दर्द देती हैं। गैप बना रहता है।" }
+            },
+            {
+              "id": "reassign",
+              "ok": true,
+              "leakage": 0.05,
+              "label": { "en": "Move him to the triage desk role and send the clean-shaven member to the ambulance", "hi": "उसे ट्राइएज डेस्क पर भेजें और क्लीन-शेव साथी को एम्बुलेंस में" },
+              "explain": {
+                "en": "Good call. Reassign until he can shave, or use a loose-fitting powered respirator (PAPR) if one is available.",
+                "hi": "सही फ़ैसला। जब तक वह शेव न कर ले, काम बदलें, या अगर उपलब्ध हो तो ढीला पावर्ड रेस्पिरेटर (PAPR) इस्तेमाल करें।"
+              }
+            }
+          ]
+        },
+        {
+          "member": "anjali",
+          "detail": {
+            "en": "Her bottom strap is hooked over her ears instead of behind her neck. She says it is more comfortable.",
+            "hi": "उसकी नीचे की पट्टी गर्दन के पीछे के बजाय कानों पर फँसी है। वह कहती है कि ऐसे आराम मिलता है।"
+          },
+          "options": [
+            {
+              "id": "adjust",
+              "ok": true,
+              "leakage": 0.04,
+              "label": { "en": "Ask her to move the strap below her ears and redo the seal check", "hi": "उससे पट्टी कानों के नीचे करने और सील चेक दोबारा करने को कहें" },
+              "explain": { "en": "Right. Straps over the ears tilt the mask and open the lower edge.", "hi": "सही। कानों पर पट्टी से मास्क झुकता है और नीचे का किनारा खुलता है।" }
+            },
+            {
+              "id": "leave",
+              "ok": false,
+              "leakage": 0.2,
+              "label": { "en": "Leave it, comfort matters for long shifts", "hi": "रहने दें, लंबी शिफ़्ट में आराम ज़रूरी है" },
+              "explain": { "en": "Comfort matters, but this position leaks. Help her adjust, and plan breaks instead.", "hi": "आराम ज़रूरी है, पर ऐसे लीक होता है। उसकी मदद करें, और ब्रेक की योजना बनाएँ।" }
+            }
+          ]
+        },
+        {
+          "member": "faiz",
+          "detail": { "en": "Mask moulded at the nose, straps placed correctly, seal check done in front of you.", "hi": "नाक पर मास्क का आकार ठीक, पट्टियाँ सही जगह, आपके सामने सील चेक किया।" },
+          "options": [
+            {
+              "id": "praise",
+              "ok": true,
+              "leakage": 0.04,
+              "label": { "en": "All good, give a thumbs up", "hi": "सब ठीक है, शाबाशी दें" },
+              "explain": { "en": "Yes. A buddy check also means saying when someone has it right.", "hi": "हाँ। बडी चेक का मतलब यह भी है कि जब कोई सही करे तो बताएँ।" }
+            },
+            {
+              "id": "redo",
+              "ok": false,
+              "leakage": 0.04,
+              "label": { "en": "Make him redo everything to be safe", "hi": "सुरक्षा के लिए सब कुछ दोबारा करवाएँ" },
+              "explain": {
+                "en": "His fit was fine. Redoing correct work wastes time and masks during an emergency.",
+                "hi": "उसका फिट ठीक था। इमरजेंसी में सही काम दोबारा करवाने से समय और मास्क बर्बाद होते हैं।"
+              }
+            }
+          ]
+        }
+      ],
+      "explain": {
+        "en": "Why one teammate matters so much: team exposure is the average of everyone's leakage. Three people at 4% and one at 35% average to about 12%, three times worse than if all four were at 4%.",
+        "hi": "एक साथी इतना मायने क्यों रखता है: टीम का एक्सपोज़र सबके लीकेज का औसत है। तीन लोग 4% पर और एक 35% पर हो तो औसत लगभग 12% होता है, जो चारों के 4% पर होने से तीन गुना बुरा है।"
+      }
+    },
+    {
       "kind": "sequence",
       "id": "doff",
       "title": {

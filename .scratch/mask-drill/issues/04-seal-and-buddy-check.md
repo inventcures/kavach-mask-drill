@@ -4,9 +4,9 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Player leakage after seal = base + 0.03 per harmful action + stock penalty (capped at 1)
-- [ ] Buddy choices set leakage per the prototype values
-- [ ] Leak puffs respect `prefers-reduced-motion`; SVG has an accessible label
-- [ ] A random-tapping Playwright run always gets past both screens
+- [x] Player leakage after seal = base + 0.03 per harmful action + stock penalty (capped at 1)
+- [x] Buddy choices set leakage per the prototype values
+- [x] Leak puffs respect `prefers-reduced-motion`; SVG has an accessible label
+- [x] A random-tapping Playwright run always gets past both screens

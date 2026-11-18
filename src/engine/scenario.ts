@@ -72,14 +72,75 @@ export interface SequenceScreen extends SequenceDef {
   explain: Text;
 }
 
+/** Where air can escape around the mask. The face drawing shows a puff at each open site. */
+export const LEAK_SITES = ['nose', 'side', 'chin'] as const;
+export type LeakSite = (typeof LEAK_SITES)[number];
+
+/**
+ * Something the player can do to the mask during the seal check: either a fix that
+ * closes one leak site, or a harmful action that may re-open one.
+ */
+export interface SealAction {
+  id: string;
+  label: Text;
+  explain: Text;
+  /** The leak this closes. A fix stays usable, so a re-opened leak can always be closed again. */
+  fixes?: LeakSite;
+  /** Costs leakage and is recorded as a mistake. Can be done only once. */
+  harmful?: boolean;
+  /** Harmful actions only: the leak this opens again. */
+  reopens?: LeakSite;
+}
+
+export interface SealScreen {
+  kind: 'seal';
+  id: string;
+  title: Text;
+  hint?: Text;
+  actions: SealAction[];
+  /** Shown once no leak is left. */
+  passed: Text;
+  /** The "seal check is not a fit test" reminder, shown with `passed`. */
+  notFitTest: Text;
+  /** Shown with `passed` when bad stock reached the team. */
+  badStockNote?: Text;
+}
+
+export interface BuddyOption {
+  id: string;
+  label: Text;
+  ok: boolean;
+  /** The teammate's leakage (0 to 1) after the player chooses this. */
+  leakage: number;
+  explain: Text;
+}
+
+export interface BuddyMate {
+  /** Team member id. Never `you`. */
+  member: string;
+  /** What the player sees when looking at this teammate. */
+  detail: Text;
+  options: BuddyOption[];
+}
+
+export interface BuddyScreen {
+  kind: 'buddy';
+  id: string;
+  title: Text;
+  hint?: Text;
+  mates: BuddyMate[];
+  /** Shown once every teammate is checked: why one leaky teammate matters. */
+  explain: Text;
+}
+
 /** Screen kinds whose content and behaviour arrive in later tickets. Only `kind` and `id` are checked for now. */
-export const PLACEHOLDER_KINDS = ['seal', 'buddy', 'bins', 'quiz', 'results'] as const;
+export const PLACEHOLDER_KINDS = ['bins', 'quiz', 'results'] as const;
 export interface PlaceholderScreen {
   kind: (typeof PLACEHOLDER_KINDS)[number];
   id: string;
 }
 
-export type ScreenDef = BriefingScreen | ChoiceScreen | StockScreen | SequenceScreen | PlaceholderScreen;
+export type ScreenDef = BriefingScreen | ChoiceScreen | StockScreen | SequenceScreen | SealScreen | BuddyScreen | PlaceholderScreen;
 export type ScreenKind = ScreenDef['kind'];
 
 export interface Scenario {
@@ -128,7 +189,9 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
     items.forEach((item, i) => text(item, `${path}[${i}]`));
   };
 
-  const checkScreen = (s: Obj, p: string) => {
+  const isSite = (v: unknown): v is LeakSite => (LEAK_SITES as readonly unknown[]).includes(v);
+
+  const checkScreen = (s: Obj, p: string, memberIds: readonly unknown[]) => {
     switch (s.kind) {
       case 'briefing':
         text(s.title, `${p}.title`);
@@ -180,6 +243,57 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
           }, 0);
         }
         break;
+      case 'seal': {
+        text(s.title, `${p}.title`);
+        optionalText(s.hint, `${p}.hint`);
+        text(s.passed, `${p}.passed`);
+        text(s.notFitTest, `${p}.notFitTest`);
+        optionalText(s.badStockNote, `${p}.badStockNote`);
+        const fixed = new Set<unknown>();
+        const ids = new Set<unknown>();
+        list(s.actions, `${p}.actions`, (a, ap) => {
+          id(a.id, `${ap}.id`);
+          if (ids.has(a.id)) err(`${ap}.id`, `duplicate action id "${String(a.id)}"`);
+          ids.add(a.id);
+          text(a.label, `${ap}.label`);
+          text(a.explain, `${ap}.explain`);
+          const harmful = a.harmful === true;
+          if (harmful === (a.fixes !== undefined)) err(ap, 'must either fix a leak or be harmful, not both');
+          if (a.fixes !== undefined && !isSite(a.fixes)) err(`${ap}.fixes`, `unknown leak site "${String(a.fixes)}"`);
+          if (a.reopens !== undefined && !isSite(a.reopens)) err(`${ap}.reopens`, `unknown leak site "${String(a.reopens)}"`);
+          if (a.reopens !== undefined && !harmful) err(`${ap}.reopens`, 'only a harmful action can re-open a leak');
+          if (!harmful) fixed.add(a.fixes);
+        });
+        // Without a fix for every site the player could never get past this screen.
+        for (const site of LEAK_SITES) if (!fixed.has(site)) err(`${p}.actions`, `no action fixes the "${site}" leak`);
+        break;
+      }
+      case 'buddy': {
+        text(s.title, `${p}.title`);
+        optionalText(s.hint, `${p}.hint`);
+        text(s.explain, `${p}.explain`);
+        const checked = new Set<unknown>();
+        list(s.mates, `${p}.mates`, (m, mp) => {
+          if (m.member === 'you' || !memberIds.includes(m.member)) err(`${mp}.member`, `"${String(m.member)}" is not a teammate`);
+          if (checked.has(m.member)) err(`${mp}.member`, `"${String(m.member)}" is checked twice`);
+          checked.add(m.member);
+          text(m.detail, `${mp}.detail`);
+          const ids = new Set<unknown>();
+          let anyOk = false;
+          list(m.options, `${mp}.options`, (o, op) => {
+            id(o.id, `${op}.id`);
+            if (ids.has(o.id)) err(`${op}.id`, `duplicate option id "${String(o.id)}"`);
+            ids.add(o.id);
+            text(o.label, `${op}.label`);
+            text(o.explain, `${op}.explain`);
+            if (typeof o.ok !== 'boolean') err(`${op}.ok`, 'must be true or false');
+            if (typeof o.leakage !== 'number' || !(o.leakage > 0 && o.leakage <= 1)) err(`${op}.leakage`, 'must be a number above 0 and at most 1');
+            anyOk ||= o.ok === true;
+          }, 2, 'options');
+          if (!anyOk) err(`${mp}.options`, 'needs at least 1 option that is ok');
+        });
+        break;
+      }
       default:
         if (!(PLACEHOLDER_KINDS as readonly unknown[]).includes(s.kind)) err(`${p}.kind`, `unknown screen kind "${String(s.kind)}"`);
     }
@@ -193,12 +307,13 @@ export function validateScenario(raw: unknown, opts: { langs?: readonly string[]
     if (!isObj(m) || !filled(m.id) || !filled(m.name)) err(`team[${i}]`, 'needs an id and a name');
   });
   if (!team.some((m) => isObj(m) && m.id === 'you')) err('team', 'needs a member with id "you"');
+  const memberIds = team.map((m) => (isObj(m) ? m.id : undefined));
   const seen = new Set<unknown>();
   list(raw.screens, 'screens', (s, p) => {
     id(s.id, `${p}.id`);
     if (seen.has(s.id)) err(`${p}.id`, `duplicate screen id "${String(s.id)}"`);
     seen.add(s.id);
-    checkScreen(s, p);
+    checkScreen(s, p, memberIds);
   }, 1, 'screen');
 
   return errors.length > 0 ? { ok: false, errors } : { ok: true, scenario: raw as unknown as Scenario };

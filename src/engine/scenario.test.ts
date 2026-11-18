@@ -21,7 +21,7 @@ describe('scenario validation', () => {
   it('accepts the shipped Nipah scenario in English and Hindi', () => {
     const r = validateScenario(nipah, { langs: ['en', 'hi'] });
     expect(r.ok ? [] : r.errors).toEqual([]);
-    expect(r.ok && r.scenario.screens.map((s) => s.kind)).toEqual(['briefing', 'choice', 'stock', 'sequence', 'sequence']);
+    expect(r.ok && r.scenario.screens.map((s) => s.kind)).toEqual(['briefing', 'choice', 'stock', 'sequence', 'seal', 'buddy', 'sequence']);
   });
 
   it('rejects a Text without English and says where it is', () => {
@@ -30,8 +30,8 @@ describe('scenario validation', () => {
   });
 
   it('rejects a Text missing a required language, but only when that language is required', () => {
-    const raw = broken((s) => delete s.screens[4].traps[1].label.hi);
-    expect(errorsOf(raw)).toEqual(['screens[4].traps[1].label: missing "hi"']);
+    const raw = broken((s) => delete s.screens[6].traps[1].label.hi);
+    expect(errorsOf(raw)).toEqual(['screens[6].traps[1].label: missing "hi"']);
     expect(errorsOf(raw, ['en'])).toEqual([]);
   });
 
@@ -44,7 +44,7 @@ describe('scenario validation', () => {
   });
 
   it('rejects two screens with the same id', () => {
-    expect(errorsOf(broken((s) => (s.screens[4].id = 'don')))).toEqual(['screens[4].id: duplicate screen id "don"']);
+    expect(errorsOf(broken((s) => (s.screens[6].id = 'don')))).toEqual(['screens[6].id: duplicate screen id "don"']);
   });
 
   it('rejects a choice task whose answers are not among the options', () => {
@@ -75,7 +75,38 @@ describe('scenario validation', () => {
   });
 
   it('accepts placeholder screens for kinds that are built in later tickets', () => {
-    expect(errorsOf(broken((s) => s.screens.push({ kind: 'seal', id: 'seal' }, { kind: 'quiz', id: 'post', phase: 'post' })))).toEqual([]);
+    expect(errorsOf(broken((s) => s.screens.push({ kind: 'bins', id: 'bins' }, { kind: 'quiz', id: 'post', phase: 'post' })))).toEqual([]);
+  });
+
+  it('rejects a seal check that leaves a leak with no way to fix it', () => {
+    const errors = errorsOf(broken((s) => (s.screens[4].actions = s.screens[4].actions.filter((a: any) => a.id !== 'straps'))));
+    expect(errors).toEqual(['screens[4].actions: no action fixes the "side" leak']);
+  });
+
+  it('rejects a seal action that is neither a fix nor harmful, or that names an unknown leak site', () => {
+    expect(errorsOf(broken((s) => delete s.screens[4].actions[5].harmful))).toEqual(['screens[4].actions[5]: must either fix a leak or be harmful, not both']);
+    expect(errorsOf(broken((s) => (s.screens[4].actions[0].reopens = 'ear')))).toEqual(['screens[4].actions[0].reopens: unknown leak site "ear"']);
+    expect(errorsOf(broken((s) => (s.screens[4].actions[1].reopens = 'chin')))).toEqual(['screens[4].actions[1].reopens: only a harmful action can re-open a leak']);
+  });
+
+  it('rejects a seal check without the passed text or the fit-test reminder', () => {
+    const errors = errorsOf(
+      broken((s) => {
+        delete s.screens[4].passed;
+        delete s.screens[4].notFitTest.hi;
+      }),
+    );
+    expect(errors).toEqual(['screens[4].passed: missing "en"', 'screens[4].passed: missing "hi"', 'screens[4].notFitTest: missing "hi"']);
+  });
+
+  it('rejects a buddy check of someone who is not a teammate', () => {
+    expect(errorsOf(broken((s) => (s.screens[5].mates[0].member = 'you')))).toEqual(['screens[5].mates[0].member: "you" is not a teammate']);
+    expect(errorsOf(broken((s) => (s.screens[5].mates[1].member = 'meera')))).toEqual(['screens[5].mates[1].member: "meera" is not a teammate']);
+  });
+
+  it('rejects a buddy option with a leakage outside 0 to 1, and a teammate with no right call', () => {
+    expect(errorsOf(broken((s) => (s.screens[5].mates[0].options[0].leakage = 35)))).toEqual(['screens[5].mates[0].options[0].leakage: must be a number above 0 and at most 1']);
+    expect(errorsOf(broken((s) => (s.screens[5].mates[1].options[0].ok = false)))).toEqual(['screens[5].mates[1].options: needs at least 1 option that is ok']);
   });
 
   it('rejects something that is not a scenario at all', () => {

@@ -20,7 +20,13 @@ const doffInOrder = ['s0', 's1', 's2', 's3', 's4', 's5', 's6'].map(tap);
 const toChoice = [next];
 const toStock = [...toChoice, ...allTasksRight, next];
 const toDon = [...toStock, ...allStockRight, next];
-const toDoff = [...toDon, ...donInOrder, next];
+const sealAct = (actionId: string): Action => ({ type: 'sealAction', actionId });
+const buddy = (memberId: string, optionId: string): Action => ({ type: 'buddyPick', memberId, optionId });
+const sealFixes = ['mould', 'straps', 'chin'].map(sealAct);
+const buddyAllRight = [buddy('ravi', 'reassign'), buddy('anjali', 'adjust'), buddy('faiz', 'praise')];
+const toSeal = [...toDon, ...donInOrder, next];
+const toBuddy = [...toSeal, ...sealFixes, next];
+const toDoff = [...toBuddy, ...buddyAllRight, next];
 
 const youLeakage = (s: SessionState) => teamMembers(scenario, s).find((m) => m.id === 'you')!.leakage;
 
@@ -38,14 +44,14 @@ describe('session: moving through the drill', () => {
     ]);
   });
 
-  it('a perfect run goes alert, choice, stock, donning, doffing, then finishes with no mistakes', () => {
+  it('a perfect run goes alert, choice, stock, donning, seal check, buddy check, doffing, then finishes with no mistakes', () => {
     const seen: (string | undefined)[] = [];
     let s = startSession(scenario);
     for (const a of [...toDoff, ...doffInOrder, next]) {
       seen.push(currentScreen(scenario, s)?.id);
       s = step(scenario, s, a);
     }
-    expect([...new Set(seen)]).toEqual(['alert', 'choose', 'stock', 'don', 'doff']);
+    expect([...new Set(seen)]).toEqual(['alert', 'choose', 'stock', 'don', 'seal', 'buddy', 'doff']);
     expect(s.finished).toBe(true);
     expect(currentScreen(scenario, s)).toBeNull();
     expect(s.mistakes).toEqual([]);
@@ -204,5 +210,140 @@ describe('session: donning and doffing', () => {
     const s = play([...toDoff, tap('s0'), tap('s6'), tap('s2'), tap('s3'), tap('s4'), tap('s5'), tap('s1')]);
     expect(canAdvance(scenario, s)).toBe(true);
     expect(s.mistakes).toEqual([]);
+  });
+});
+
+describe('session: seal check', () => {
+  const openLeaks = (s: SessionState) => {
+    const p = s.progress.seal;
+    return p?.kind === 'seal' ? [...p.open].sort() : null;
+  };
+
+  it('starts with leaks at the nose, sides and chin and cannot be passed until all are fixed', () => {
+    const s = play(toSeal);
+    expect(openLeaks(s)).toEqual(['chin', 'nose', 'side']);
+    expect(canAdvance(scenario, s)).toBe(false);
+    const two = play([sealAct('mould'), sealAct('chin')], s);
+    expect(openLeaks(two)).toEqual(['side']);
+    expect(canAdvance(scenario, two)).toBe(false);
+    expect(play([next], two).index).toBe(two.index);
+  });
+
+  it('fixing every leak with no harmful action passes the check and leaves the player at the base leakage', () => {
+    const s = play([...toSeal, ...sealFixes]);
+    expect(openLeaks(s)).toEqual([]);
+    expect(canAdvance(scenario, s)).toBe(true);
+    expect(youLeakage(s)).toBeCloseTo(0.03, 10);
+    expect(s.mistakes).toEqual([]);
+  });
+
+  it('each harmful action is a mistake and adds 0.03 to the player for the rest of the drill', () => {
+    const one = play([...toSeal, sealAct('tape')]);
+    expect(youLeakage(one)).toBeCloseTo(0.06, 10);
+    expect(one.mistakes).toEqual([
+      { code: 'seal_tape', screenId: 'seal', note: expect.objectContaining({ en: 'Stuff tissue into the gaps', hi: 'गैप में टिश्यू भर दें' }) },
+    ]);
+    const all = play([sealAct('pinch'), sealAct('cross'), ...sealFixes, next], one);
+    expect(currentScreen(scenario, all)?.id).toBe('buddy');
+    expect(youLeakage(all)).toBeCloseTo(0.12, 10);
+    expect(all.mistakes.map((m) => m.code)).toEqual(['seal_tape', 'seal_pinch', 'seal_cross']);
+  });
+
+  it('harmful actions and the stock penalty add up on the player', () => {
+    const s = play([...toStock, stock('B', true), stock('A', true), stock('C', false), stock('D', false), stock('E', true), stock('F', false), next, ...donInOrder, next, sealAct('pinch'), sealAct('cross'), ...sealFixes]);
+    expect(youLeakage(s)).toBeCloseTo(0.03 + 0.06 + 0.15, 10);
+  });
+
+  it('a harmful action re-opens a fixed leak, and the fix can always be used again', () => {
+    const reopened = play([...toSeal, ...sealFixes.slice(0, 2), sealAct('pinch'), sealAct('cross')]);
+    expect(openLeaks(reopened)).toEqual(['chin', 'nose', 'side']);
+    const fixed = play(sealFixes, reopened);
+    expect(openLeaks(fixed)).toEqual([]);
+    expect(canAdvance(scenario, fixed)).toBe(true);
+  });
+
+  it('a harmful action can be done only once, so re-sending it records nothing more', () => {
+    const once = play([...toSeal, sealAct('pinch')]);
+    const again = play([sealAct('pinch'), sealAct('pinch')], once);
+    expect(again).toBe(once);
+  });
+
+  it('repeating a fix records nothing and changes no leakage', () => {
+    const s = play([...toSeal, sealAct('mould'), sealAct('mould')]);
+    expect(openLeaks(s)).toEqual(['chin', 'side']);
+    expect(s.mistakes).toEqual([]);
+    expect(youLeakage(s)).toBeCloseTo(0.03, 10);
+  });
+
+  it('once the seal check is passed nothing can undo it', () => {
+    const passed = play([...toSeal, ...sealFixes]);
+    expect(play([sealAct('pinch'), sealAct('tape'), sealAct('mould')], passed)).toBe(passed);
+  });
+
+  it('remembers the last action so its explanation can be shown', () => {
+    const s = play([...toSeal, sealAct('mould'), sealAct('cross')]);
+    const p = s.progress.seal;
+    expect(p?.kind === 'seal' && p.last).toBe('cross');
+  });
+
+  it('every reachable mix of actions can still be finished with the three fixes', () => {
+    const ids = ['pinch', 'mould', 'straps', 'cross', 'chin', 'tape'];
+    // Every ordered triple of actions, then the fixes: 216 paths through the screen.
+    for (const a of ids) for (const b of ids) for (const c of ids) {
+      const s = play([...[a, b, c].map(sealAct), ...sealFixes], play(toSeal));
+      expect(canAdvance(scenario, s), `${a}, ${b}, ${c}`).toBe(true);
+    }
+  });
+});
+
+describe('session: buddy check', () => {
+  const leakages = (s: SessionState) => Object.fromEntries(teamMembers(scenario, s).map((m) => [m.id, m.leakage]));
+
+  it('teammates have no reading until the player has checked them', () => {
+    const s = play([...toBuddy, buddy('anjali', 'adjust')]);
+    expect(leakages(s)).toEqual({ you: expect.closeTo(0.03, 10), ravi: null, anjali: 0.04, faiz: null });
+    expect(canAdvance(scenario, s)).toBe(false);
+  });
+
+  it('the right calls leave Ravi at 5% and Anjali and Faiz at 4%, with no mistakes', () => {
+    const s = play([...toBuddy, ...buddyAllRight]);
+    expect(leakages(s)).toEqual({ you: expect.closeTo(0.03, 10), ravi: 0.05, anjali: 0.04, faiz: 0.04 });
+    expect(s.mistakes).toEqual([]);
+    expect(canAdvance(scenario, s)).toBe(true);
+  });
+
+  it('letting Ravi carry on with stubble leaves him at 35% and is recorded against him', () => {
+    const s = play([...toBuddy, buddy('ravi', 'fine')]);
+    expect(leakages(s).ravi).toBe(0.35);
+    expect(s.mistakes).toEqual([
+      { code: 'buddy_ravi', screenId: 'buddy', note: expect.objectContaining({ en: 'Ravi: Looks fine, carry on', hi: 'Ravi: ठीक लगता है, चलने दें' }) },
+    ]);
+  });
+
+  it('the other wrong calls set the leakage the scenario gives them', () => {
+    expect(leakages(play([...toBuddy, buddy('ravi', 'tighten')])).ravi).toBe(0.25);
+    expect(leakages(play([...toBuddy, buddy('anjali', 'leave')])).anjali).toBe(0.2);
+  });
+
+  it('making Faiz redo a good fit is a mistake that does not change his leakage', () => {
+    const s = play([...toBuddy, buddy('faiz', 'redo')]);
+    expect(leakages(s).faiz).toBe(0.04);
+    expect(s.mistakes.map((m) => m.code)).toEqual(['buddy_faiz']);
+  });
+
+  it('each teammate can be checked only once', () => {
+    const once = play([...toBuddy, buddy('ravi', 'fine')]);
+    expect(play([buddy('ravi', 'fine'), buddy('ravi', 'reassign')], once)).toBe(once);
+  });
+
+  it('ignores a teammate or option the screen does not have', () => {
+    const s = play(toBuddy);
+    expect(play([buddy('you', 'fine'), buddy('ravi', 'nope'), buddy('nobody', 'fine')], s)).toBe(s);
+  });
+
+  it('three teammates at 4% and Ravi at 35% bring the team to about 12% leakage', () => {
+    const s = play([...toChoice, ...allTasksRight, next, ...allStockRight, next, ...donInOrder, next, sealAct('tape'), ...sealFixes, next, buddy('ravi', 'fine'), buddy('anjali', 'adjust'), buddy('faiz', 'praise')]);
+    const all = teamMembers(scenario, s).map((m) => m.leakage ?? 0);
+    expect(all.reduce((a, b) => a + b, 0) / all.length).toBeCloseTo(0.1225, 10);
   });
 });

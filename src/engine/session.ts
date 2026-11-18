@@ -1,5 +1,5 @@
 import noteTemplates from '../content/mistake-notes.json';
-import type { ChoiceScreen, Scenario, ScreenDef, SequenceScreen, StockScreen } from './scenario';
+import { LEAK_SITES, type BuddyScreen, type ChoiceScreen, type LeakSite, type Scenario, type ScreenDef, type SealScreen, type SequenceScreen, type StockScreen } from './scenario';
 import { memberLeakage, type LeakageFault, type MaskKind, type ScoredMember } from './scoring';
 import { isSequenceComplete, sequenceCards, startSequence, tapCard, type SequenceState, type TapOutcome } from './sequence';
 import { fillText, type Text } from './text';
@@ -17,13 +17,21 @@ export interface Mistake {
 export interface MemberFit {
   mask: MaskKind | null;
   faults: readonly LeakageFault[];
+  /** Harmful things done during the seal check. Each one costs leakage for the rest of the drill. */
+  harmfulSealActions?: number;
+  /** Leakage seen at the buddy check. When set, it is this member's leakage as it stands. */
+  observedLeakage?: number;
 }
 
 /** What the player has done on one screen. Later screen kinds add their own variant here. */
 export type ScreenProgress =
   | { kind: 'choice'; picks: Readonly<Record<string, string>> }
   | { kind: 'stock'; decisions: Readonly<Record<string, 'use' | 'reject'>> }
-  | { kind: 'sequence'; order: readonly string[]; seq: SequenceState; last: { cardId: string; outcome: TapOutcome } | null };
+  | { kind: 'sequence'; order: readonly string[]; seq: SequenceState; last: { cardId: string; outcome: TapOutcome } | null }
+  /** `open`: leak sites still leaking. `harmDone`: harmful action ids used. `last`: the action whose explanation shows. */
+  | { kind: 'seal'; open: readonly LeakSite[]; harmDone: readonly string[]; last: string | null }
+  /** Option id picked for each teammate checked so far, keyed by member id. */
+  | { kind: 'buddy'; picks: Readonly<Record<string, string>> };
 
 export interface SessionState {
   scenarioId: string;
@@ -43,7 +51,9 @@ export type Action =
   | { type: 'restart' }
   | { type: 'pickOption'; taskId: string; optionId: string }
   | { type: 'decideStock'; itemId: string; use: boolean }
-  | { type: 'tapCard'; cardId: string };
+  | { type: 'tapCard'; cardId: string }
+  | { type: 'sealAction'; actionId: string }
+  | { type: 'buddyPick'; memberId: string; optionId: string };
 
 /** Returns a number in [0, 1), like Math.random. Injected so tests can fix the card order. */
 export type Rng = () => number;
@@ -67,6 +77,10 @@ function freshProgress(screen: ScreenDef, rng: Rng): ScreenProgress | null {
       return { kind: 'stock', decisions: {} };
     case 'sequence':
       return { kind: 'sequence', order: shuffled(sequenceCards(screen), rng).map((c) => c.id), seq: startSequence(), last: null };
+    case 'seal':
+      return { kind: 'seal', open: [...LEAK_SITES], harmDone: [], last: null };
+    case 'buddy':
+      return { kind: 'buddy', picks: {} };
     default:
       return null;
   }
@@ -96,15 +110,22 @@ export function canAdvance(scenario: Scenario, state: SessionState): boolean {
   if (screen.kind === 'choice' && p?.kind === 'choice') return screen.tasks.every((t) => t.id in p.picks);
   if (screen.kind === 'stock' && p?.kind === 'stock') return screen.items.every((it) => it.id in p.decisions);
   if (screen.kind === 'sequence' && p?.kind === 'sequence') return isSequenceComplete(screen, p.seq);
+  if (screen.kind === 'seal' && p?.kind === 'seal') return p.open.length === 0;
+  if (screen.kind === 'buddy' && p?.kind === 'buddy') return screen.mates.every((m) => m.member in p.picks);
   return true;
+}
+
+function fitLeakage(fit: MemberFit): number | null {
+  if (fit.observedLeakage !== undefined) return Math.min(1, Math.max(0, fit.observedLeakage));
+  if (fit.mask === null) return null;
+  return memberLeakage({ mask: fit.mask, faults: fit.faults, harmfulSealActions: fit.harmfulSealActions });
 }
 
 /** The team as the meter and team row need it: leakage is null until a member is masked up. */
 export function teamMembers(scenario: Scenario, state: SessionState): (ScoredMember & { name: string })[] {
   return scenario.team.map((m) => {
     const fit = state.fits[m.id];
-    const leakage = fit && fit.mask !== null ? memberLeakage({ mask: fit.mask, faults: fit.faults }) : null;
-    return { id: m.id, name: m.name, leakage };
+    return { id: m.id, name: m.name, leakage: fit ? fitLeakage(fit) : null };
   });
 }
 
@@ -175,6 +196,36 @@ function tapSequenceCard(screen: SequenceScreen, state: SessionState, cardId: st
   return s;
 }
 
+function sealAction(screen: SealScreen, state: SessionState, actionId: string): SessionState {
+  const p = state.progress[screen.id];
+  const action = screen.actions.find((a) => a.id === actionId);
+  // Once every leak is closed the check is passed and stays passed.
+  if (p?.kind !== 'seal' || !action || p.open.length === 0) return state;
+  if (!action.harmful) {
+    // A fix is never used up: whatever re-opens a leak, the player can close it again.
+    if (p.last === action.id && !p.open.includes(action.fixes!)) return state;
+    return withProgress(state, screen.id, { ...p, open: p.open.filter((site) => site !== action.fixes), last: action.id });
+  }
+  if (p.harmDone.includes(action.id)) return state;
+  const open = action.reopens && !p.open.includes(action.reopens) ? [...p.open, action.reopens] : p.open;
+  let s = withProgress(state, screen.id, { ...p, open, harmDone: [...p.harmDone, action.id], last: action.id });
+  s = withPlayerFit(s, (fit) => ({ ...fit, harmfulSealActions: (fit.harmfulSealActions ?? 0) + 1 }));
+  return withMistake(s, { code: `seal_${action.id}`, screenId: screen.id, note: action.label });
+}
+
+function buddyPick(scenario: Scenario, screen: BuddyScreen, state: SessionState, memberId: string, optionId: string): SessionState {
+  const p = state.progress[screen.id];
+  const mate = screen.mates.find((m) => m.member === memberId);
+  const option = mate?.options.find((o) => o.id === optionId);
+  if (p?.kind !== 'buddy' || !mate || !option || memberId in p.picks) return state;
+  let s = withProgress(state, screen.id, { kind: 'buddy', picks: { ...p.picks, [memberId]: optionId } });
+  const before = s.fits[memberId] ?? { mask: null, faults: [] };
+  s = { ...s, fits: { ...s.fits, [memberId]: { ...before, observedLeakage: option.leakage } } };
+  if (option.ok) return s;
+  const name = scenario.team.find((m) => m.id === memberId)?.name ?? memberId;
+  return withMistake(s, { code: `buddy_${memberId}`, screenId: screen.id, note: fillText(noteTemplates.buddyChoice, { name, option: option.label }) });
+}
+
 /**
  * The whole game as one pure function. An action that makes no sense right now
  * (wrong screen kind, already answered, not ready to advance) returns the same state,
@@ -194,5 +245,9 @@ export function step(scenario: Scenario, state: SessionState, action: Action, rn
       return screen.kind === 'stock' ? decideStock(screen, state, action.itemId, action.use) : state;
     case 'tapCard':
       return screen.kind === 'sequence' ? tapSequenceCard(screen, state, action.cardId) : state;
+    case 'sealAction':
+      return screen.kind === 'seal' ? sealAction(screen, state, action.actionId) : state;
+    case 'buddyPick':
+      return screen.kind === 'buddy' ? buddyPick(scenario, screen, state, action.memberId, action.optionId) : state;
   }
 }
