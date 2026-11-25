@@ -59,7 +59,7 @@ The end-to-end tests need Chromium: run `npx playwright install chromium` once o
 - Every UI string lives in `src/content/locales/<lang>.json`. A missing key falls back to English.
 - `scripts/build-sw.mjs` writes a small service worker that precaches every built file. `scripts/check-size.mjs` fails the build if `dist/` goes over 250 KB gzipped.
 - `.github/workflows/ci.yml` typechecks, runs the unit tests, builds, and runs the Playwright end-to-end suite against the production build on every push and pull request.
-- Hosting: [Railway](https://railway.com). `railway.json` builds with `npm ci && npm run build` and starts `node server.mjs`, a dependency-free static server for `dist/` on `$PORT`. Deploy with `railway up` from a checkout.
+- Hosting: GitHub Pages at https://drill.kavach.bio. `.github/workflows/pages.yml` builds and tests every push to `main` and publishes `dist/` (plus `CNAME`) to the `gh-pages` branch, which Pages serves. The older Railway setup: [Railway](https://railway.com). `railway.json` builds with `npm ci && npm run build` and starts `node server.mjs`, a dependency-free static server for `dist/` on `$PORT`. Deploy with `railway up` from a checkout.
 
 ## Contributing
 
