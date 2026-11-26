@@ -177,3 +177,8 @@ tbody th { font-weight: 400; }
 p.t { margin: 0 0 10px; }
 .protocol { margin: 12px 0 0; }
 abbr[title] { text-decoration: none; }
+
+/* Home screen intro. */
+.lede { font-size: 17px; line-height: 1.45; margin: 0; }
+.card > h3:first-child { margin-top: 0; }
+.card > p:last-child { margin-bottom: 0; }
